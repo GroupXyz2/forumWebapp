@@ -6,8 +6,9 @@ declare global {
 
 // Check for required environment variables
 const MONGODB_URI = process.env.MONGODB_URI;
+const isBuildProcess = process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
 
-if (!MONGODB_URI) {
+if (!MONGODB_URI && !isBuildProcess) {
   throw new Error('Please define the MONGODB_URI environment variable in .env.local');
 }
 
@@ -31,15 +32,21 @@ async function connectToDatabase() {
     // The import is not used directly, but it ensures the models are registered
     await import('./models');
     
-    cached.promise = mongoose.connect(MONGODB_URI!, options)
-      .then((mongoose) => {
-        console.log('Connected to MongoDB');
-        return mongoose;
-      })
-      .catch((err) => {
-        console.error('MongoDB connection error:', err);
-        throw err;
-      });
+    // Skip actual connection during build process to avoid connection errors
+    if (isBuildProcess) {
+      console.log('Build process detected, skipping actual MongoDB connection');
+      cached.promise = Promise.resolve(mongoose);
+    } else {
+      cached.promise = mongoose.connect(MONGODB_URI!, options)
+        .then((mongoose) => {
+          console.log('Connected to MongoDB');
+          return mongoose;
+        })
+        .catch((err) => {
+          console.error('MongoDB connection error:', err);
+          throw err;
+        });
+    }
   }
 
   try {

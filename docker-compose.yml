@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  # Single container with both MongoDB and the app
+  forum-webapp:
+    build: .
+    container_name: forum-webapp
+    ports:
+      - "3456:3456"
+    volumes:
+      # Only need to mount certificates
+      - ./certificates:/app/certificates
+      - mongodb_data:/data/db
+    
+volumes:
+  mongodb_data:

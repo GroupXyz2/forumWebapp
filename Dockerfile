@@ -1,34 +1,56 @@
-# Use official Node.js LTS image
-FROM node:24-alpine3.21
+# Use Ubuntu as base to include both Node.js and MongoDB
+FROM ubuntu:22.04
 
-# Set working directory
+# Avoid interactive prompts during installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install Node.js, MongoDB and other dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    ca-certificates \
+    lsb-release \
+    git \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && curl -fsSL https://pgp.mongodb.com/server-7.0.asc | gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor \
+    && echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list \
+    && apt-get update \
+    && apt-get install -y nodejs mongodb-org \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create MongoDB data directory
+RUN mkdir -p /data/db
+
+# Set working directory for the app
 WORKDIR /app
 
 # Copy package files and install dependencies
 COPY package.json package-lock.json* ./
 RUN npm install
 
-# Copy the rest of the app (excluding .env.local and certificates)
+# Copy the rest of the app
 COPY . .
 
-# Copy special Docker config file and build env
-COPY next.config.docker.js next.config.docker.js
-COPY .env.build .env.build
+# Create local environment file
+RUN echo "MONGODB_URI=mongodb://localhost:27017/forum" > .env.local && \
+    echo "MONGODB_DB=forum" >> .env.local && \
+    echo "USE_SSL=false" >> .env.local && \
+    echo "PORT=3456" >> .env.local && \
+    echo "HOST=0.0.0.0" >> .env.local
 
-# Set environment variables to bypass type checking and telemetry
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV NEXT_IGNORE_TYPE_ERRORS=1
-ENV NODE_ENV=production
-ENV NEXT_IGNORE_ESLINT=1
-ENV NEXT_CONFIG_FILE=next.config.docker.js
-
-# Use environment variables during build and special Next.js config
-RUN cp next.config.docker.js next.config.js && \
-    npm run build:docker && \
-    echo "Build completed successfully"
-
-# Expose the port (match your .env.local PORT)
+# Expose the port
 EXPOSE 3456
 
-# Start the app using the custom server
-CMD ["npm", "run", "start:ssl"]
+# Create startup script
+RUN echo "#!/bin/bash\n\
+echo 'Starting MongoDB...'\n\
+mongod --fork --logpath /var/log/mongodb.log --bind_ip 0.0.0.0\n\
+sleep 2\n\
+echo 'MongoDB started successfully'\n\
+echo 'Starting Next.js application...'\n\
+npm run dev:ssl" > /app/start.sh \
+&& chmod +x /app/start.sh
+
+# Start MongoDB and the app
+CMD ["/app/start.sh"]

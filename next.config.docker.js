@@ -18,6 +18,11 @@ const nextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  // Prevent building API routes during build process to avoid DB connection issues
+  output: process.env.NEXT_PHASE === 'phase-production-build' ? 'export' : undefined,
+  // Skip all API routes during build to avoid DB connection issues
+  skipMiddlewareUrlNormalize: true,
+  skipTrailingSlashRedirect: true,
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
@@ -28,7 +33,8 @@ const nextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb'
-    }
+    },
+    instrumentationHook: false,
   },
   devIndicators: false
 };
