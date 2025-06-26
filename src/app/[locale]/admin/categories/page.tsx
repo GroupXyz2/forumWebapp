@@ -1,14 +1,25 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
 import CategoryManagement from '@/components/admin/CategoryManagement';
 import connectToDatabase from '@/lib/db';
 import Category from '@/models/Category';
+// Import locale translations directly
+import enTranslations from '@/i18n/locales/en.json';
+import deTranslations from '@/i18n/locales/de.json';
+
+// Helper function to get translation
+const getTranslation = (
+  locale: string,
+  key: string,
+  section: 'admin' | 'common' | 'forum' = 'admin'
+) => {
+  const translations = locale === 'de' ? deTranslations : enTranslations;
+  return (translations as any)[section][key] || key;
+};
 
 export default async function CategoriesPage({ params }: { params: { locale: string } }) {
   const session = await getServerSession(authOptions);
-  const t = await getTranslations('Admin');
   const locale = params.locale;
   
   // Check if user is admin (only admins can manage categories)
@@ -36,8 +47,12 @@ export default async function CategoriesPage({ params }: { params: { locale: str
     <div className="container mx-auto p-4 max-w-6xl">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">{t('categoryManagement')}</h1>
-          <p className="text-gray-500 dark:text-gray-400">{t('create_category')}, {t('edit_category')}, {t('delete_category')}</p>
+          <h1 className="text-2xl font-bold">{getTranslation(locale, 'categoryManagement')}</h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            {getTranslation(locale, 'create_category')}, 
+            {getTranslation(locale, 'edit_category')}, 
+            {getTranslation(locale, 'delete_category')}
+          </p>
         </div>
         
       </div>

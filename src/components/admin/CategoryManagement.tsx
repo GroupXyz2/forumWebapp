@@ -1,8 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
 import { Trash, Edit, Plus, Move } from 'lucide-react';
+// Import locale translations directly
+import enTranslations from '@/i18n/locales/en.json';
+import deTranslations from '@/i18n/locales/de.json';
+
+// Helper functions for translation
+const tr = (locale: string, key: string, section = 'admin') => {
+  const translations = locale === 'de' ? deTranslations : enTranslations;
+  return (translations as any)[section][key] || key;
+};
+
+const tc = (locale: string, key: string) => {
+  return tr(locale, key, 'common');
+};
 import CategoryForm from './CategoryForm';
 
 interface Category {
@@ -30,8 +42,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
-  const t = useTranslations('Admin');
-  const commonT = useTranslations('common');
+  // We now use our helper functions with the locale prop
   
   const showSuccess = (message: string) => {
     setSuccessMessage(message);
@@ -59,7 +70,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
       const data = await response.json();
       setCategories([...categories, data.category]);
       setIsCreating(false);
-      showSuccess(t('categoryCreated'));
+      showSuccess(tr(locale, 'categoryCreated'));
     } catch (err) {
       console.error('Create category error:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -91,7 +102,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
         cat.id === editingCategory?.id ? data.category : cat
       ));
       setEditingCategory(null);
-      showSuccess(t('categoryUpdated'));
+      showSuccess(tr(locale, 'categoryUpdated'));
     } catch (err) {
       console.error('Update category error:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -118,7 +129,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
       
       setCategories(categories.filter(cat => cat.id !== deletingCategory));
       setDeletingCategory(null);
-      showSuccess(t('categoryDeleted'));
+      showSuccess(tr(locale, 'categoryDeleted'));
     } catch (err) {
       console.error('Delete category error:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -190,19 +201,19 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
       {/* Categories List */}
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between">
-          <h2 className="text-xl font-semibold">{t('categories')}</h2>
+          <h2 className="text-xl font-semibold">{tr(locale, 'categories')}</h2>
           <button
             onClick={() => setIsCreating(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
           >
             <Plus size={16} />
-            {t('createCategory')}
+            {tr(locale, 'createCategory')}
           </button>
         </div>
         
         {categories.length === 0 ? (
           <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-            {t('noCategories')}
+            {tr(locale, 'noCategories')}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -210,19 +221,19 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
               <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {t('order')}
+                    {tr(locale, 'order')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {t('categoryName')}
+                    {tr(locale, 'categoryName')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {t('categorySlug')}
+                    {tr(locale, 'categorySlug')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {t('threads')}
+                    {tr(locale, 'threads')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {commonT('actions')}
+                    {tc(locale, 'actions')}
                   </th>
                 </tr>
               </thead>
@@ -278,7 +289,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 mx-2"
                       >
                         <Edit size={18} />
-                        <span className="sr-only">{commonT('edit')}</span>
+                        <span className="sr-only">{tc(locale, 'edit')}</span>
                       </button>
                       <button
                         onClick={() => setDeletingCategory(category.id)}
@@ -286,7 +297,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
                         disabled={category.threadCount > 0}
                       >
                         <Trash size={18} />
-                        <span className="sr-only">{commonT('delete')}</span>
+                        <span className="sr-only">{tc(locale, 'delete')}</span>
                       </button>
                     </td>
                   </tr>
@@ -302,7 +313,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg">
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">{t('createCategory')}</h2>
+              <h2 className="text-xl font-semibold mb-4">{tr(locale, 'createCategory')}</h2>
               <CategoryForm 
                 onSubmit={handleCreateCategory}
                 onCancel={() => setIsCreating(false)}
@@ -319,7 +330,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg">
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">{t('editCategory')}</h2>
+              <h2 className="text-xl font-semibold mb-4">{tr(locale, 'editCategory')}</h2>
               <CategoryForm 
                 initialData={editingCategory}
                 onSubmit={handleUpdateCategory}
@@ -337,9 +348,9 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">{t('deleteCategory')}</h2>
+              <h2 className="text-xl font-semibold mb-4">{tr(locale, 'deleteCategory')}</h2>
               <p className="text-gray-600 dark:text-gray-300 mb-6">
-                {t('confirmDeleteCategory')}
+                {tr(locale, 'confirmDeleteCategory')}
               </p>
               <div className="flex justify-end gap-3">
                 <button
@@ -347,14 +358,14 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
                   className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   disabled={isSubmitting}
                 >
-                  {commonT('cancel')}
+                  {tc(locale, 'cancel')}
                 </button>
                 <button
                   onClick={handleDeleteCategory}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? commonT('loading') : commonT('delete')}
+                  {isSubmitting ? tc(locale, 'loading') : tc(locale, 'delete')}
                 </button>
               </div>
             </div>

@@ -3,7 +3,7 @@
 import { Locale } from "@/i18n/settings";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 // Import locale translations
@@ -24,6 +24,16 @@ export default function AdminPage({ params: { locale } }: AdminPageProps) {
   const router = useRouter();
   const t = translations[locale];
 
+  // Real stats and activity state
+  const [stats, setStats] = useState({ userCount: 0, threadCount: 0, postCount: 0 });
+  const [recentActivity, setRecentActivity] = useState({
+    recentUsers: [],
+    recentThreads: [],
+    recentAuditLogs: []
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [activityLoading, setActivityLoading] = useState(true);
+
   useEffect(() => {
     // Redirect if not admin or moderator
     if (status === "authenticated") {
@@ -34,6 +44,20 @@ export default function AdminPage({ params: { locale } }: AdminPageProps) {
       router.push(`/${locale}/auth/signin?callbackUrl=/${locale}/admin`);
     }
   }, [session, status, router, locale]);
+
+  useEffect(() => {
+    fetch(`/${locale}/api/admin/stats`)
+      .then(res => res.json())
+      .then(data => setStats(data))
+      .finally(() => setStatsLoading(false));
+  }, [locale]);
+  
+  useEffect(() => {
+    fetch(`/${locale}/api/admin/recent-activity`)
+      .then(res => res.json())
+      .then(data => setRecentActivity(data))
+      .finally(() => setActivityLoading(false));
+  }, [locale]);
 
   // Show loading state while checking authentication
   if (status === "loading" || status === "unauthenticated") {
@@ -147,7 +171,7 @@ export default function AdminPage({ params: { locale } }: AdminPageProps) {
               {locale === 'en' ? 'Total Users' : 'Benutzer Insgesamt'}
             </p>
             <p className="font-semibold text-2xl text-gray-900 dark:text-white">
-              127
+              {statsLoading ? '...' : stats.userCount}
             </p>
           </div>
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
@@ -155,7 +179,7 @@ export default function AdminPage({ params: { locale } }: AdminPageProps) {
               {locale === 'en' ? 'Total Threads' : 'Threads Insgesamt'}
             </p>
             <p className="font-semibold text-2xl text-gray-900 dark:text-white">
-              102
+              {statsLoading ? '...' : stats.threadCount}
             </p>
           </div>
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
@@ -163,7 +187,7 @@ export default function AdminPage({ params: { locale } }: AdminPageProps) {
               {locale === 'en' ? 'Total Posts' : 'Posts Insgesamt'}
             </p>
             <p className="font-semibold text-2xl text-gray-900 dark:text-white">
-              655
+              {statsLoading ? '...' : stats.postCount}
             </p>
           </div>
         </div>
@@ -173,41 +197,96 @@ export default function AdminPage({ params: { locale } }: AdminPageProps) {
         <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
           {locale === 'en' ? 'Recent Activity' : 'Neueste Aktivitäten'}
         </h2>
-        <div className="space-y-4">
-          <div className="flex items-start">
-            <span className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-blue-500"></span>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {locale === 'en' ? 'New user registered' : 'Neuer Benutzer registriert'}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {locale === 'en' ? '5 minutes ago' : 'vor 5 Minuten'}
-              </p>
-            </div>
+        {activityLoading ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500" />
           </div>
-          <div className="flex items-start">
-            <span className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-green-500"></span>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {locale === 'en' ? 'New thread created in Technology' : 'Neues Thema in Technologie erstellt'}
+        ) : (
+          <div className="space-y-6">
+            {recentActivity.recentUsers?.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {locale === 'en' ? 'New Users' : 'Neue Benutzer'}
+                </h3>
+                <div className="space-y-3">
+                  {recentActivity.recentUsers.map((user: any) => (
+                    <div key={user._id} className="flex items-start">
+                      <span className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-blue-500"></span>
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {user.name} - <span className="text-blue-600 dark:text-blue-400">{user.role}</span>
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {locale === 'en' 
+                            ? `Joined ${new Date(user.createdAt).toLocaleDateString()}` 
+                            : `Beigetreten am ${new Date(user.createdAt).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {recentActivity.recentThreads?.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {locale === 'en' ? 'New Threads' : 'Neue Threads'}
+                </h3>
+                <div className="space-y-3">
+                  {recentActivity.recentThreads.map((thread: any) => (
+                    <div key={thread._id} className="flex items-start">
+                      <span className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-green-500"></span>
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          <Link href={`/${locale}/forum/${thread.category?.slug}/${thread.slug}`}>
+                            {thread.title}
+                          </Link> - <span className="text-gray-600 dark:text-gray-400">{thread.category?.name}</span>
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {locale === 'en' 
+                            ? `By ${thread.author?.name} on ${new Date(thread.createdAt).toLocaleDateString()}` 
+                            : `Von ${thread.author?.name} am ${new Date(thread.createdAt).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {recentActivity.recentAuditLogs?.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {locale === 'en' ? 'Moderation Activity' : 'Moderationsaktivität'}
+                </h3>
+                <div className="space-y-3">
+                  {recentActivity.recentAuditLogs.map((log: any) => (
+                    <div key={log._id} className="flex items-start">
+                      <span className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-yellow-500"></span>
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {log.actionType} - <span className="text-gray-600 dark:text-gray-400">{log.entityType}</span>
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {locale === 'en' 
+                            ? `By ${log.performedBy?.name} on ${new Date(log.createdAt).toLocaleDateString()}` 
+                            : `Von ${log.performedBy?.name} am ${new Date(log.createdAt).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {!recentActivity.recentUsers?.length && !recentActivity.recentThreads?.length && !recentActivity.recentAuditLogs?.length && (
+              <p className="text-center text-gray-500 dark:text-gray-400">
+                {locale === 'en' ? 'No recent activity found' : 'Keine aktuellen Aktivitäten gefunden'}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {locale === 'en' ? '15 minutes ago' : 'vor 15 Minuten'}
-              </p>
-            </div>
+            )}
           </div>
-          <div className="flex items-start">
-            <span className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-yellow-500"></span>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {locale === 'en' ? 'User reported a post' : 'Benutzer hat einen Beitrag gemeldet'}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {locale === 'en' ? '30 minutes ago' : 'vor 30 Minuten'}
-              </p>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
