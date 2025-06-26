@@ -1,0 +1,1 @@
+erstelle mir ein modernes Forum mit darkmode (standart) und lightmode, admin verwaltungs features, language support in de und en, welches gut aussieht (blautöne mit eingearbeitet, modernes design) und accounts und authentifizierung (mit discord account anmelden) sowie mongodb benutzt.

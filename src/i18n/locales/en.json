@@ -1,0 +1,79 @@
+{
+  "app_name": "Forum",
+  "navigation": {
+    "home": "Home",
+    "categories": "Categories",
+    "forum": "Forum",
+    "profile": "Profile",
+    "admin": "Admin"
+  },
+  "auth": {
+    "signin": "Sign In",
+    "signout": "Sign Out",
+    "signin_with_discord": "Sign In with Discord",
+    "signin_success": "Successfully signed in",
+    "signin_error": "An error occurred during sign in"
+  },
+  "forum": {
+    "categories": "Categories",
+    "threads": "Threads",
+    "posts": "Posts",
+    "newest": "Newest",
+    "popular": "Popular",
+    "create_thread": "Create Thread",
+    "reply": "Reply",
+    "views": "Views",
+    "replies": "Replies",
+    "last_post": "Last Post",
+    "by_user": "by {{username}}",
+    "locked": "Locked",
+    "pinned": "Pinned"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "categories": "Categories",
+    "threads": "Threads",
+    "reports": "Reports",
+    "settings": "Settings",
+    "create_category": "Create Category",
+    "edit_category": "Edit Category",
+    "delete_category": "Delete Category",
+    "manage_users": "Manage Users",
+    "assign_role": "Assign Role"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "search": "Search"
+  },
+  "theme": {
+    "dark": "Dark Mode",
+    "light": "Light Mode"
+  },
+  "profile": {
+    "activity": "Activity",
+    "activity_stats_coming_soon": "Activity statistics will be available soon",
+    "account_details": "Account Details",
+    "username": "Username",
+    "email": "Email",
+    "account_type": "Account Type",
+    "member_since": "Member since",
+    "back_to_forum": "Back to Forum"
+  },
+  "roles": {
+    "admin": "Admin",
+    "moderator": "Moderator",
+    "user": "User"
+  }
+}

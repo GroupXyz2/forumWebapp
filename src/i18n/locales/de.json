@@ -1,0 +1,79 @@
+{
+  "app_name": "Forum",
+  "navigation": {
+    "home": "Startseite",
+    "categories": "Kategorien",
+    "forum": "Forum",
+    "profile": "Profil",
+    "admin": "Admin"
+  },
+  "auth": {
+    "signin": "Anmelden",
+    "signout": "Abmelden",
+    "signin_with_discord": "Mit Discord anmelden",
+    "signin_success": "Erfolgreich angemeldet",
+    "signin_error": "Bei der Anmeldung ist ein Fehler aufgetreten"
+  },
+  "forum": {
+    "categories": "Kategorien",
+    "threads": "Themen",
+    "posts": "Beiträge",
+    "newest": "Neueste",
+    "popular": "Beliebt",
+    "create_thread": "Thema erstellen",
+    "reply": "Antworten",
+    "views": "Aufrufe",
+    "replies": "Antworten",
+    "last_post": "Letzter Beitrag",
+    "by_user": "von {{username}}",
+    "locked": "Geschlossen",
+    "pinned": "Angepinnt"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "users": "Benutzer",
+    "categories": "Kategorien",
+    "threads": "Themen",
+    "reports": "Meldungen",
+    "settings": "Einstellungen",
+    "create_category": "Kategorie erstellen",
+    "edit_category": "Kategorie bearbeiten",
+    "delete_category": "Kategorie löschen",
+    "manage_users": "Benutzer verwalten",
+    "assign_role": "Rolle zuweisen"
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "submit": "Absenden",
+    "loading": "Lädt...",
+    "error": "Ein Fehler ist aufgetreten",
+    "success": "Erfolgreich",
+    "yes": "Ja",
+    "no": "Nein",
+    "confirm": "Bestätigen",
+    "search": "Suchen"
+  },
+  "theme": {
+    "dark": "Dunkelmodus",
+    "light": "Hellmodus"
+  },
+  "profile": {
+    "activity": "Aktivität",
+    "activity_stats_coming_soon": "Aktivitätsstatistiken werden bald verfügbar sein",
+    "account_details": "Kontodaten",
+    "username": "Benutzername",
+    "email": "E-Mail",
+    "account_type": "Kontotyp",
+    "member_since": "Mitglied seit",
+    "back_to_forum": "Zurück zum Forum"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "moderator": "Moderator",
+    "user": "Benutzer"
+  }
+}
