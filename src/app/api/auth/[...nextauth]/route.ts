@@ -77,9 +77,60 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       // Add role to client-side session
       if (token && session.user) {
-        session.user.role = token.role as string;
-        session.user.id = token.id as string;
-        session.user.discordId = token.discordId as string;
+        // Check if user is banned
+        try {
+          await connectToDatabase();
+          const userId = token.id as string;
+          const user = await User.findById(userId).lean() as any;
+          
+          if (user && user.isBanned) {
+            // Check if ban has expired
+            if (user.bannedUntil && new Date(user.bannedUntil) < new Date()) {
+              // Ban has expired, automatically unban the user
+              await User.findByIdAndUpdate(userId, {
+                $set: {
+                  isBanned: false,
+                  bannedUntil: null,
+                  banReason: ''
+                }
+              });
+            } else {
+              // User is still banned
+              session.user.isBanned = true;
+              session.user.bannedUntil = user.bannedUntil;
+              session.user.banReason = user.banReason || 'Account suspended';
+            }
+          }
+          
+          // Check if user is muted
+          if (user && user.isMuted) {
+            // Check if mute has expired
+            if (user.mutedUntil && new Date(user.mutedUntil) < new Date()) {
+              // Mute has expired, automatically unmute the user
+              await User.findByIdAndUpdate(userId, {
+                $set: {
+                  isMuted: false,
+                  mutedUntil: null
+                }
+              });
+            } else {
+              // User is still muted
+              session.user.isMuted = true;
+              session.user.mutedUntil = user.mutedUntil;
+            }
+          }
+          
+          session.user.role = user?.role || token.role as string;
+          session.user.id = userId;
+          session.user.discordId = token.discordId as string;
+          session.user.warningCount = user?.warningCount || 0;
+        } catch (error) {
+          console.error('Session ban check error:', error);
+          // Default values if we couldn't check the ban status
+          session.user.role = token.role as string;
+          session.user.id = token.id as string;
+          session.user.discordId = token.discordId as string;
+        }
       }
       
       return session;

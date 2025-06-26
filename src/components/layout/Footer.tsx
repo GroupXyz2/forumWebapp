@@ -16,7 +16,7 @@ export default function Footer({ locale }: FooterProps) {
               href={`/${locale}`}
               className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-sm"
             >
-              © {year} Forum
+              © {year} GroupXyz
             </Link>
           </div>
           <div className="flex space-x-6">

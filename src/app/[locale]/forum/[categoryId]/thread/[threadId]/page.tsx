@@ -4,6 +4,8 @@ import Image from 'next/image';
 import { Locale, locales } from '@/i18n/settings';
 import { getThread } from '@/actions/threadActions';
 import ReplyForm from '@/components/forum/ReplyForm';
+import ModActions from '@/components/forum/ModActions';
+import ModPostAction from '@/components/forum/ModPostAction';
 
 // Import locale translations
 import enTranslations from '@/i18n/locales/en.json';
@@ -107,6 +109,15 @@ export default async function ThreadPage({
           </div>
         </div>
       </div>
+      
+      {/* Moderation Actions - only visible to admins/mods */}
+      <ModActions 
+        threadId={threadId}
+        categoryId={categoryId}
+        isPinned={thread.isPinned} 
+        isLocked={thread.isLocked}
+        locale={localeValue as Locale}
+      />
 
       {/* Thread OP and replies */}
       <div className="space-y-6">
@@ -208,7 +219,15 @@ export default async function ThreadPage({
                 
                 {/* Post content */}
                 <div className="flex-1 sm:border-l sm:border-gray-200 dark:sm:border-gray-700 sm:pl-6 py-2">
-                  <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
+                    <ModPostAction 
+                      postId={post.id}
+                      threadId={threadId}
+                      categoryId={categoryId}
+                      locale={localeValue as Locale}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

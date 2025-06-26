@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { createReply } from '@/actions/threadActions';
 import { Locale } from '@/i18n/settings';
+import { AlertTriangle } from 'lucide-react';
 
 // Import locale translations
 import enTranslations from '@/i18n/locales/en.json';
@@ -14,6 +15,21 @@ const translations = {
   en: enTranslations,
   de: deTranslations,
 };
+
+// Helper function to format date
+function formatDate(date: string | Date | null | undefined) {
+  if (!date) return null;
+  
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  
+  return new Intl.DateTimeFormat("default", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(dateObj);
+}
 
 type ReplyFormProps = {
   threadId: string;
@@ -30,11 +46,30 @@ export default function ReplyForm({ threadId, categoryId, locale }: ReplyFormPro
   
   const t = translations[locale as keyof typeof translations];
   
+  // Check if user is banned or muted
+  const isBanned = session?.user?.isBanned;
+  const isMuted = session?.user?.isMuted;
+  
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
     if (status !== 'authenticated') {
       router.push(`/${locale}/auth/signin`);
+      return;
+    }
+    
+    // Check for bans/mutes client-side to avoid unnecessary requests
+    if (isBanned) {
+      setError(session.user.banReason || t.admin.userIsBanned);
+      return;
+    }
+    
+    if (isMuted) {
+      const mutedUntil = session.user.mutedUntil 
+        ? t.admin.mutedUntil + ": " + formatDate(session.user.mutedUntil)
+        : t.admin.userIsMuted;
+        
+      setError(mutedUntil);
       return;
     }
     
@@ -94,6 +129,54 @@ export default function ReplyForm({ threadId, categoryId, locale }: ReplyFormPro
     );
   }
   
+  // Show ban notification
+  if (isBanned) {
+    return (
+      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex gap-3">
+        <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-red-700 dark:text-red-400 font-medium">
+            {t.admin.banned}
+          </p>
+          <p className="text-red-600 dark:text-red-500 text-sm mt-1">
+            {session?.user.banReason || t.admin.userIsBanned}
+          </p>
+          {session?.user.bannedUntil ? (
+            <p className="text-red-600/80 dark:text-red-500/80 text-sm mt-1">
+              {t.admin.bannedUntil}: {formatDate(session.user.bannedUntil)}
+            </p>
+          ) : (
+            <p className="text-red-600/80 dark:text-red-500/80 text-sm mt-1">
+              {t.admin.bannedPermanently}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+  
+  // Show mute notification
+  if (isMuted) {
+    return (
+      <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg flex gap-3">
+        <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-yellow-700 dark:text-yellow-400 font-medium">
+            {t.admin.muted}
+          </p>
+          <p className="text-yellow-600 dark:text-yellow-500 text-sm mt-1">
+            {t.admin.userIsMuted}
+          </p>
+          {session?.user.mutedUntil && (
+            <p className="text-yellow-600/80 dark:text-yellow-500/80 text-sm mt-1">
+              {t.admin.mutedUntil}: {formatDate(session.user.mutedUntil)}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
@@ -103,23 +186,26 @@ export default function ReplyForm({ threadId, categoryId, locale }: ReplyFormPro
       )}
       
       <div>
+        <label htmlFor="content" className="sr-only">
+          {t.forum.reply}
+        </label>
         <textarea
+          id="content"
+          name="content"
+          rows={4}
+          className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm px-4 py-3 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          placeholder={locale === 'en' ? 'Type your reply here...' : 'Geben Sie hier Ihre Antwort ein...'}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          rows={6}
-          className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-900 dark:text-gray-100"
-          placeholder={locale === 'en' ? 'Write your reply here...' : 'Schreiben Sie Ihre Antwort hier...'}
-          disabled={isSubmitting}
+          required
         ></textarea>
       </div>
       
       <div className="flex justify-end">
         <button
           type="submit"
-          disabled={isSubmitting || !content.trim()}
-          className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-            (isSubmitting || !content.trim()) ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          disabled={isSubmitting}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
             <>
@@ -127,7 +213,7 @@ export default function ReplyForm({ threadId, categoryId, locale }: ReplyFormPro
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              {t.common.loading}
+              {locale === 'en' ? 'Submitting...' : 'Wird gesendet...'}
             </>
           ) : (
             t.forum.reply

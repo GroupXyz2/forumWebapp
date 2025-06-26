@@ -9,6 +9,12 @@ declare module "next-auth" {
       image?: string | null;
       role: string;
       discordId: string;
+      isBanned?: boolean;
+      bannedUntil?: Date | string | null;
+      banReason?: string;
+      isMuted?: boolean;
+      mutedUntil?: Date | string | null;
+      warningCount?: number;
     };
   }
 

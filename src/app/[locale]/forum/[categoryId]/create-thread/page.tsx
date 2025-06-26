@@ -48,6 +48,11 @@ export default function CreateThreadPage({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
+    // Prevent duplicate submissions
+    if (isSubmitting) {
+      return;
+    }
+    
     if (!title.trim() || !content.trim()) {
       setError(localeValue === 'en' 
         ? 'Title and content are required' 
@@ -62,7 +67,10 @@ export default function CreateThreadPage({
       const result = await createThread(categoryId, title, content);
       
       if (result.success && result.threadId) {
-        router.push(`/${localeValue}/forum/${categoryId}/thread/${result.threadId}`);
+        // Immediately redirect to prevent potential double submissions
+        // Use replace instead of push to prevent back button from returning to the form
+        router.replace(`/${localeValue}/forum/${categoryId}/thread/${result.threadId}`);
+        return; // Early return to prevent state updates after navigation
       } else {
         setError(result.message || (localeValue === 'en' 
           ? 'Failed to create thread' 

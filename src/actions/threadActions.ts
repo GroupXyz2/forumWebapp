@@ -139,6 +139,16 @@ export async function createReply(
         post: null
       };
     }
+    
+    // Check if user is banned or muted
+    const permissionCheck = await checkUserPostPermission();
+    if (!permissionCheck.canPost) {
+      return {
+        success: false,
+        message: permissionCheck.message,
+        post: null
+      };
+    }
 
     // Check if thread exists and is not locked
     const thread = await Thread.findById(threadId);
@@ -211,7 +221,7 @@ export async function createReply(
 }
 
 export async function createThread(
-  categoryId: string,
+  categoryIdOrSlug: string,
   title: string,
   content: string
 ) {
@@ -227,8 +237,27 @@ export async function createThread(
       };
     }
     
-    // Check if category exists
-    const category = await Category.findById(categoryId);
+    // Check if user is banned or muted
+    const permissionCheck = await checkUserPostPermission();
+    if (!permissionCheck.canPost) {
+      return {
+        success: false,
+        message: permissionCheck.message,
+        threadId: null
+      };
+    }
+    
+    // Check if the input is a slug or an ID
+    let category;
+    
+    // Try to find by slug first (most common case for user-facing URLs)
+    category = await Category.findOne({ slug: categoryIdOrSlug }).lean();
+    
+    // If not found by slug, try to find by ID (fallback)
+    if (!category && mongoose.Types.ObjectId.isValid(categoryIdOrSlug)) {
+      category = await Category.findById(categoryIdOrSlug).lean();
+    }
+    
     if (!category) {
       return {
         success: false,
@@ -236,6 +265,9 @@ export async function createThread(
         threadId: null
       };
     }
+    
+    // Get the actual category ID from the found category
+    const categoryId = (category as any)._id;
     
     // Create new thread
     const thread = await Thread.create({
@@ -252,7 +284,7 @@ export async function createThread(
       thread: thread._id
     });
     
-    revalidatePath(`/forum/${categoryId}`);
+    revalidatePath(`/forum/${categoryIdOrSlug}`);
     
     return {
       success: true,
@@ -267,4 +299,45 @@ export async function createThread(
       threadId: null
     };
   }
+}
+
+// Helper function to check if user can post (not banned or muted)
+async function checkUserPostPermission() {
+  const session = await getServerSession(authOptions);
+  
+  if (!session || !session.user) {
+    return {
+      canPost: false,
+      message: 'Not authenticated'
+    };
+  }
+  
+  // Check if user is banned
+  if (session.user.isBanned) {
+    return {
+      canPost: false,
+      message: session.user.banReason 
+        ? `You are banned: ${session.user.banReason}` 
+        : 'Your account is currently banned'
+    };
+  }
+  
+  // Check if user is muted
+  if (session.user.isMuted) {
+    const mutedUntil = session.user.mutedUntil 
+      ? new Date(session.user.mutedUntil).toLocaleString()
+      : undefined;
+    
+    return {
+      canPost: false,
+      message: mutedUntil
+        ? `You are muted until ${mutedUntil}`
+        : 'You are currently muted'
+    };
+  }
+  
+  return {
+    canPost: true,
+    message: 'Allowed'
+  };
 }

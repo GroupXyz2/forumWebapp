@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import { Locale, locales } from '@/i18n/settings';
 
 // Import locale translations
@@ -16,6 +16,21 @@ const translations = {
   en: enTranslations,
   de: deTranslations,
 };
+
+// Helper function to format date
+function formatDate(date: string | Date | null | undefined) {
+  if (!date) return null;
+  
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  
+  return new Intl.DateTimeFormat("default", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(dateObj);
+}
 
 export default function ProfilePage({ 
   params 
@@ -52,8 +67,55 @@ export default function ProfilePage({
     return null; // This will be handled by the useEffect redirect
   }
   
+  // Check if user is banned or muted
+  const isBanned = session.user?.isBanned;
+  const isMuted = session.user?.isMuted;
+  
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Account Status Notifications */}
+      {isBanned && (
+        <div className="bg-red-900/30 border border-red-800 rounded-lg p-4 mb-6 flex gap-3 items-start">
+          <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+          <div>
+            <h2 className="font-semibold text-red-400">
+              {t.admin.banned}
+            </h2>
+            <p className="text-gray-300 text-sm mt-1">
+              {session.user.banReason || t.admin.banned}
+            </p>
+            {session.user.bannedUntil ? (
+              <p className="text-gray-400 text-sm mt-2">
+                {t.admin.bannedUntil}: {formatDate(session.user.bannedUntil)}
+              </p>
+            ) : (
+              <p className="text-gray-400 text-sm mt-2">
+                {t.admin.bannedPermanently}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {!isBanned && isMuted && (
+        <div className="bg-yellow-900/30 border border-yellow-800 rounded-lg p-4 mb-6 flex gap-3 items-start">
+          <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+          <div>
+            <h2 className="font-semibold text-yellow-400">
+              {t.admin.muted}
+            </h2>
+            <p className="text-gray-300 text-sm mt-1">
+              {t.admin.userIsMuted}
+            </p>
+            {session.user.mutedUntil && (
+              <p className="text-gray-400 text-sm mt-2">
+                {t.admin.mutedUntil}: {formatDate(session.user.mutedUntil)}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
           <div className="relative">
@@ -78,7 +140,7 @@ export default function ProfilePage({
                 </span>
               )}
               {session.user?.role === 'moderator' && (
-                <span className="inline-block bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
+                <span className="inline-block bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
                   {t.roles.moderator}
                 </span>
               )}
