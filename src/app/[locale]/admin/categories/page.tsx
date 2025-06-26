@@ -15,7 +15,12 @@ const getTranslation = (
   section: 'admin' | 'common' | 'forum' = 'admin'
 ) => {
   const translations = locale === 'de' ? deTranslations : enTranslations;
-  return (translations as any)[section][key] || key;
+  const sectionObj = (translations as any)[section];
+  const value = sectionObj ? sectionObj[key] : undefined;
+
+  // Return only string values, never objects
+  if (typeof value === 'string') return value;
+  return key;
 };
 
 export default async function CategoriesPage({ params }: { params: { locale: string } }) {
@@ -57,7 +62,7 @@ export default async function CategoriesPage({ params }: { params: { locale: str
         </div>
         
       </div>
-      
+
       <CategoryManagement 
         initialCategories={formattedCategories} 
         locale={locale}

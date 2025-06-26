@@ -167,9 +167,12 @@
     "slugFormat": "Slug can only contain lowercase letters, numbers, and hyphens",
     "categoryCreated": "Category created successfully",
     "categoryUpdated": "Category updated successfully",
-    "categoryDeleted": "Category deleted successfully"
+    "categoryDeleted": "Category deleted successfully",
+    "order": "Order"
   },
   "common": {
+    "order": "Order",
+    "actions": "Actions",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",

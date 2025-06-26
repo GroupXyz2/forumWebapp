@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+// Import locale translations directly
+import enTranslations from '@/i18n/locales/en.json';
+import deTranslations from '@/i18n/locales/de.json';
 
 interface CategoryFormProps {
   initialData?: {
@@ -33,8 +35,19 @@ export default function CategoryForm({
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const t = useTranslations('Admin');
-  const commonT = useTranslations('common');
+  
+  // Helper functions for translation
+  const tr = (key: string, section = 'admin') => {
+    const translations = locale === 'de' ? deTranslations : enTranslations;
+    const sectionObj = (translations as any)[section];
+    const value = sectionObj ? sectionObj[key] : undefined;
+    if (typeof value === 'string') return value;
+    return typeof value === 'undefined' ? key : String(value);
+  };
+  
+  const tc = (key: string) => {
+    return tr(key, 'common');
+  };
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -50,13 +63,13 @@ export default function CategoryForm({
     const newErrors: Record<string, string> = {};
     
     if (!formData.name.trim()) {
-      newErrors.name = t('categoryRequired');
+      newErrors.name = tr('categoryRequired');
     }
     
     if (!formData.slug.trim()) {
-      newErrors.slug = t('slugRequired');
+      newErrors.slug = tr('slugRequired');
     } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
-      newErrors.slug = t('slugFormat');
+      newErrors.slug = tr('slugFormat');
     }
     
     setErrors(newErrors);
@@ -121,7 +134,7 @@ export default function CategoryForm({
         {/* Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t('categoryName')} *
+            {tr('categoryName')} *
           </label>
           <input
             type="text"
@@ -137,7 +150,7 @@ export default function CategoryForm({
         {/* Slug */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t('categorySlug')} *
+            {tr('categorySlug')} *
           </label>
           <input
             type="text"
@@ -149,7 +162,7 @@ export default function CategoryForm({
             pattern="[a-z0-9-]+"
           />
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {t('slugFormat')}
+            {tr('slugFormat')}
           </p>
           {errors.slug && <p className="mt-1 text-sm text-red-600">{errors.slug}</p>}
         </div>
@@ -157,7 +170,7 @@ export default function CategoryForm({
         {/* Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t('categoryDescription')}
+            {tr('categoryDescription')}
           </label>
           <textarea
             name="description"
@@ -171,7 +184,7 @@ export default function CategoryForm({
         {/* Color */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t('categoryColor')}
+            {tr('categoryColor')}
           </label>
           <div className="flex items-center space-x-2">
             <input
@@ -202,7 +215,7 @@ export default function CategoryForm({
         {/* Icon */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t('categoryIcon')}
+            {tr('categoryIcon')}
           </label>
           <select
             name="icon"
@@ -226,14 +239,14 @@ export default function CategoryForm({
           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
           disabled={isSubmitting}
         >
-          {commonT('cancel')}
+          {tc('cancel')}
         </button>
         <button
           type="submit"
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
           disabled={isSubmitting}
         >
-          {isSubmitting ? commonT('loading') : initialData ? commonT('save') : commonT('create')}
+          {isSubmitting ? tc('loading') : initialData ? tc('save') : tc('create')}
         </button>
       </div>
     </form>

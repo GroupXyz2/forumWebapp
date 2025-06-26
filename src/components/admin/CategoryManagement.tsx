@@ -9,7 +9,12 @@ import deTranslations from '@/i18n/locales/de.json';
 // Helper functions for translation
 const tr = (locale: string, key: string, section = 'admin') => {
   const translations = locale === 'de' ? deTranslations : enTranslations;
-  return (translations as any)[section][key] || key;
+  const sectionObj = (translations as any)[section];
+  const value = sectionObj ? sectionObj[key] : undefined;
+  if (typeof value === 'string') return value;
+  // If value is an object (bad translation), return key
+  if (typeof value === 'object' && value !== null) return key;
+  return typeof value === 'undefined' ? key : String(value);
 };
 
 const tc = (locale: string, key: string) => {
