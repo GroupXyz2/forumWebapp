@@ -38,10 +38,18 @@ export default function CategoryForm({
   
   // Helper functions for translation
   const tr = (key: string, section = 'admin') => {
-    const translations = locale === 'de' ? deTranslations : enTranslations;
+    // Force locale to be either 'en' or 'de'
+    const localeStr = typeof locale === 'string' ? (locale === 'de' ? 'de' : 'en') : 'en';
+    const translations = localeStr === 'de' ? deTranslations : enTranslations;
+    
     const sectionObj = (translations as any)[section];
-    const value = sectionObj ? sectionObj[key] : undefined;
+    if (!sectionObj) return key;
+    
+    const value = sectionObj[key];
+    
     if (typeof value === 'string') return value;
+    if (typeof value === 'object' && value !== null) return key;
+    
     return typeof value === 'undefined' ? key : String(value);
   };
   

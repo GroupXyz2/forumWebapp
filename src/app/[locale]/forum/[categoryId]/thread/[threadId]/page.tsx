@@ -6,6 +6,8 @@ import { getThread } from '@/actions/threadActions';
 import ReplyForm from '@/components/forum/ReplyForm';
 import ModActions from '@/components/forum/ModActions';
 import ModPostAction from '@/components/forum/ModPostAction';
+import LikeButton from '@/components/forum/LikeButton';
+import { hasUserLikedPost } from '@/actions/likeActions';
 
 // Import locale translations
 import enTranslations from '@/i18n/locales/en.json';
@@ -38,7 +40,7 @@ export default async function ThreadPage({
   const page = 1;
   const limit = 20;
   
-  // Get thread and posts
+  // Get thread and posts - no need to manually pass userId as getThread gets it from session
   const { thread, posts, pagination } = await getThread(threadId, page, limit);
   
   // If thread doesn't exist, return 404
@@ -119,56 +121,8 @@ export default async function ThreadPage({
         locale={localeValue as Locale}
       />
 
-      {/* Thread OP and replies */}
+      {/* Thread content and replies */}
       <div className="space-y-6">
-        {/* First post (Thread OP) */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden" id="post-op">
-          <div className="p-6">
-            <div className="flex flex-col sm:flex-row gap-6">
-              {/* Author info */}
-              <div className="sm:w-48 flex flex-row sm:flex-col items-center sm:items-start gap-4 sm:gap-2">
-                <div className="flex-shrink-0">
-                  {thread.author.image ? (
-                    <Image
-                      src={thread.author.image}
-                      alt={thread.author.name}
-                      width={48}
-                      height={48}
-                      className="rounded-full"
-                    />
-                  ) : (
-                    <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-lg">
-                      {thread.author.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <div className="font-medium text-gray-900 dark:text-gray-100">{thread.author.name}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{formatDate(thread.createdAt)}</div>
-                  {thread.author.role && (
-                    <div className="mt-1">
-                      {thread.author.role === 'admin' && (
-                        <span className="inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded">
-                          {t.roles.admin}
-                        </span>
-                      )}
-                      {thread.author.role === 'moderator' && (
-                        <span className="inline-block bg-yellow-500 text-white text-xs px-2 py-0.5 rounded">
-                          {t.roles.moderator}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Post content */}
-              <div className="flex-1 sm:border-l sm:border-gray-200 dark:sm:border-gray-700 sm:pl-6 py-2">
-                <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: thread.content }} />
-              </div>
-            </div>
-          </div>
-        </div>
         
         {/* Replies */}
         {posts.map((post) => (
@@ -226,6 +180,14 @@ export default async function ThreadPage({
                       threadId={threadId}
                       categoryId={categoryId}
                       locale={localeValue as Locale}
+                    />
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <LikeButton 
+                      postId={post.id}
+                      initialLikeCount={post.likeCount}
+                      initialLiked={post.userHasLiked}
+                      locale={localeValue}
                     />
                   </div>
                 </div>

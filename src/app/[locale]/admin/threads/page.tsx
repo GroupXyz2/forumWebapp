@@ -291,7 +291,7 @@ export default function AdminThreadsPage({ params: { locale } }: AdminThreadsPag
                         </Link>
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
-                        {thread.content}
+                        {/* Thread content is now stored in first post */}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

@@ -5,6 +5,7 @@ import Image from "next/image";
 // Import locale translations
 import enTranslations from "@/i18n/locales/en.json";
 import deTranslations from "@/i18n/locales/de.json";
+import { getSettings, initializeSettings } from "@/actions/settingsActions";
 
 const translations = {
   en: enTranslations,
@@ -29,7 +30,23 @@ export default async function HomePage({
     throw new Error(`Invalid locale: ${localeValue}`);
   }
   
+  // Initialize settings if needed and get homepage settings
+  await initializeSettings();
+  const settings = await getSettings('homepage');
+  
   const t = translations[localeValue as keyof typeof translations];
+  
+  // Helper to get localized setting value
+  const getSetting = (key: string, defaultValue: string = '') => {
+    const setting = settings[key];
+    if (!setting) return defaultValue;
+    
+    if (typeof setting.value === 'object' && setting.value !== null) {
+      return setting.value[localeValue] || setting.value.en || defaultValue;
+    }
+    
+    return setting.value || defaultValue;
+  };
 
   return (
     <div className="flex flex-col items-center">
@@ -46,13 +63,13 @@ export default async function HomePage({
         <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-5xl md:text-6xl">
           <span className="block">{t.app_name}</span>
           <span className="block text-blue-600 dark:text-blue-400">
-            {localeValue === 'en' ? 'Modern Discussion Platform' : 'Moderne Diskussionsplattform'}
+            {getSetting('homepage_title', localeValue === 'en' ? 'Modern Discussion Platform' : 'Moderne Diskussionsplattform')}
           </span>
         </h1>
         <p className="mt-3 max-w-md mx-auto text-base text-gray-500 dark:text-gray-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-          {localeValue === 'en'
+          {getSetting('homepage_slogan', localeValue === 'en'
             ? 'Join our community to discuss your favorite topics in a modern, user-friendly environment.'
-            : 'Tritt unserer Community bei, um deine Lieblingsthemen in einer modernen, benutzerfreundlichen Umgebung zu diskutieren.'}
+            : 'Tritt unserer Community bei, um deine Lieblingsthemen in einer modernen, benutzerfreundlichen Umgebung zu diskutieren.')}
         </p>
         <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
           <div className="rounded-md shadow">
@@ -60,7 +77,7 @@ export default async function HomePage({
               href={`/${localeValue}/forum`}
               className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10"
             >
-              {localeValue === 'en' ? 'Browse Forums' : 'Foren durchsuchen'}
+              {getSetting('primary_cta_text', localeValue === 'en' ? 'Browse Forums' : 'Foren durchsuchen')}
             </Link>
           </div>
           <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">

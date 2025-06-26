@@ -298,7 +298,7 @@ export async function getAllThreads(
     const formattedThreads = threads.map((thread: any) => ({
       id: thread._id.toString(),
       title: thread.title,
-      content: thread.content.substring(0, 100) + (thread.content.length > 100 ? '...' : ''),
+      content: '', // Thread content is now stored in the first post
       author: {
         id: thread.author._id.toString(),
         name: thread.author.name,

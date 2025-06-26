@@ -21,11 +21,16 @@ export async function GET(
     // Get all categories, sorted by order
     const categories = await Category.find().sort({ order: 1 }).lean();
     
-    // Format categories for the client
+    // Get locale from the URL path
+    const url = new URL(request.url);
+    const pathParts = url.pathname.split('/');
+    const locale = pathParts.find(part => part === 'en' || part === 'de') || 'en';
+    
+    // Format categories for the client, resolving multilingual fields to the current locale
     const formattedCategories = categories.map((cat: any) => ({
       id: cat._id.toString(),
-      name: cat.name,
-      description: cat.description,
+      name: cat.name && typeof cat.name === 'object' ? cat.name[locale] || cat.name.en || 'Unnamed Category' : cat.name,
+      description: cat.description && typeof cat.description === 'object' ? cat.description[locale] || cat.description.en || '' : cat.description,
       slug: cat.slug,
       color: cat.color || '#3b82f6',
       icon: cat.icon || 'folder',

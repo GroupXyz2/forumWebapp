@@ -199,7 +199,8 @@ export async function getCategoryThreads(
         return {
           id: (thread._id as mongoose.Types.ObjectId).toString(),
           title: thread.title,
-          content: thread.content,
+          // Thread content is now stored in the first post
+          content: '',
           author: thread.author,
           views: thread.views,
           isPinned: thread.isPinned,

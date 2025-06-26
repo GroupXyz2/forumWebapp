@@ -8,9 +8,15 @@ import deTranslations from '@/i18n/locales/de.json';
 
 // Helper functions for translation
 const tr = (locale: string, key: string, section = 'admin') => {
-  const translations = locale === 'de' ? deTranslations : enTranslations;
+  // Force locale to be either 'en' or 'de'
+  const localeStr = typeof locale === 'string' ? (locale === 'de' ? 'de' : 'en') : 'en';
+  const translations = localeStr === 'de' ? deTranslations : enTranslations;
   const sectionObj = (translations as any)[section];
-  const value = sectionObj ? sectionObj[key] : undefined;
+  
+  if (!sectionObj) return key;
+  
+  const value = sectionObj[key];
+  
   if (typeof value === 'string') return value;
   // If value is an object (bad translation), return key
   if (typeof value === 'object' && value !== null) return key;
@@ -39,6 +45,9 @@ interface CategoryManagementProps {
 }
 
 export default function CategoryManagement({ initialCategories, locale }: CategoryManagementProps) {
+  // Ensure locale is a string
+  const actualLocale = typeof locale === 'string' ? locale : 'en';
+  
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [isCreating, setIsCreating] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -59,7 +68,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
       setIsSubmitting(true);
       setError(null);
       
-      const response = await fetch(`/${locale}/api/admin/categories`, {
+      const response = await fetch(`/${actualLocale}/api/admin/categories`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +84,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
       const data = await response.json();
       setCategories([...categories, data.category]);
       setIsCreating(false);
-      showSuccess(tr(locale, 'categoryCreated'));
+      showSuccess(tr(actualLocale, 'categoryCreated'));
     } catch (err) {
       console.error('Create category error:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -107,7 +116,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
         cat.id === editingCategory?.id ? data.category : cat
       ));
       setEditingCategory(null);
-      showSuccess(tr(locale, 'categoryUpdated'));
+      showSuccess(tr(actualLocale, 'categoryUpdated'));
     } catch (err) {
       console.error('Update category error:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -134,7 +143,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
       
       setCategories(categories.filter(cat => cat.id !== deletingCategory));
       setDeletingCategory(null);
-      showSuccess(tr(locale, 'categoryDeleted'));
+      showSuccess(tr(actualLocale, 'categoryDeleted'));
     } catch (err) {
       console.error('Delete category error:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -206,19 +215,19 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
       {/* Categories List */}
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between">
-          <h2 className="text-xl font-semibold">{tr(locale, 'categories')}</h2>
+          <h2 className="text-xl font-semibold">{tr(actualLocale, 'categories')}</h2>
           <button
             onClick={() => setIsCreating(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
           >
             <Plus size={16} />
-            {tr(locale, 'createCategory')}
+            {tr(actualLocale, 'createCategory')}
           </button>
         </div>
         
         {categories.length === 0 ? (
           <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-            {tr(locale, 'noCategories')}
+            {tr(actualLocale, 'noCategories')}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -226,19 +235,19 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
               <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {tr(locale, 'order')}
+                    {tr(actualLocale, 'order')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {tr(locale, 'categoryName')}
+                    {tr(actualLocale, 'categoryName')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {tr(locale, 'categorySlug')}
+                    {tr(actualLocale, 'categorySlug')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {tr(locale, 'threads')}
+                    {tr(actualLocale, 'threads')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    {tc(locale, 'actions')}
+                    {tc(actualLocale, 'actions')}
                   </th>
                 </tr>
               </thead>
@@ -294,7 +303,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 mx-2"
                       >
                         <Edit size={18} />
-                        <span className="sr-only">{tc(locale, 'edit')}</span>
+                        <span className="sr-only">{tc(actualLocale, 'edit')}</span>
                       </button>
                       <button
                         onClick={() => setDeletingCategory(category.id)}
@@ -302,7 +311,7 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
                         disabled={category.threadCount > 0}
                       >
                         <Trash size={18} />
-                        <span className="sr-only">{tc(locale, 'delete')}</span>
+                        <span className="sr-only">{tc(actualLocale, 'delete')}</span>
                       </button>
                     </td>
                   </tr>
@@ -318,12 +327,12 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg">
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">{tr(locale, 'createCategory')}</h2>
+              <h2 className="text-xl font-semibold mb-4">{tr(actualLocale, 'createCategory')}</h2>
               <CategoryForm 
                 onSubmit={handleCreateCategory}
                 onCancel={() => setIsCreating(false)}
                 isSubmitting={isSubmitting}
-                locale={locale}
+                locale={actualLocale}
               />
             </div>
           </div>
@@ -335,13 +344,13 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg">
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">{tr(locale, 'editCategory')}</h2>
+              <h2 className="text-xl font-semibold mb-4">{tr(actualLocale, 'editCategory')}</h2>
               <CategoryForm 
                 initialData={editingCategory}
                 onSubmit={handleUpdateCategory}
                 onCancel={() => setEditingCategory(null)}
                 isSubmitting={isSubmitting}
-                locale={locale}
+                locale={actualLocale}
               />
             </div>
           </div>
@@ -353,9 +362,9 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">{tr(locale, 'deleteCategory')}</h2>
+              <h2 className="text-xl font-semibold mb-4">{tr(actualLocale, 'deleteCategory')}</h2>
               <p className="text-gray-600 dark:text-gray-300 mb-6">
-                {tr(locale, 'confirmDeleteCategory')}
+                {tr(actualLocale, 'confirmDeleteCategory')}
               </p>
               <div className="flex justify-end gap-3">
                 <button
@@ -363,14 +372,14 @@ export default function CategoryManagement({ initialCategories, locale }: Catego
                   className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   disabled={isSubmitting}
                 >
-                  {tc(locale, 'cancel')}
+                  {tc(actualLocale, 'cancel')}
                 </button>
                 <button
                   onClick={handleDeleteCategory}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? tc(locale, 'loading') : tc(locale, 'delete')}
+                  {isSubmitting ? tc(actualLocale, 'loading') : tc(actualLocale, 'delete')}
                 </button>
               </div>
             </div>

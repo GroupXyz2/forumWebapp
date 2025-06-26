@@ -13,7 +13,8 @@ import mongoose from 'mongoose';
 type ThreadWithDetails = {
   id: string;
   title: string;
-  content: string;
+  // Making content optional since it's stored in the first post now
+  content?: string; 
   author: any;
   views: number;
   isPinned: boolean;
@@ -28,6 +29,8 @@ type PostWithDetails = {
   content: string;
   author: any;
   likes: any[];
+  likeCount: number;
+  userHasLiked: boolean;
   createdAt: Date;
   updatedAt: Date;
   isEdited: boolean;
@@ -52,10 +55,36 @@ export async function getThread(
   try {
     await connectToDatabase();
     
-    // Find the thread and increment view count
+    // Get the current user session
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+    
+    let updateOperation = {};
+    
+    // Only increment view if the user is logged in and hasn't viewed this thread before
+    if (userId) {
+      // Check if the user has already viewed this thread using $elemMatch to find exact match
+      const alreadyViewed = await Thread.findOne({
+        _id: threadId,
+        viewedBy: userId
+      });
+      
+      if (!alreadyViewed) {
+        // User hasn't viewed the thread yet, increment count and add to viewedBy
+        updateOperation = {
+          $inc: { views: 1 },
+          $addToSet: { viewedBy: userId }
+        };
+      }
+    } else {
+      // We won't increment views for anonymous users to prevent count abuse
+      updateOperation = { $set: {} };
+    }
+    
+    // Find the thread and update view count if needed
     const thread = await Thread.findByIdAndUpdate(
       threadId,
-      { $inc: { views: 1 } },
+      Object.keys(updateOperation).length > 0 ? updateOperation : { $set: {} }, // Use empty $set if no update needed
       { new: true }
     )
       .populate('author', 'name image')
@@ -88,6 +117,8 @@ export async function getThread(
       content: post.content,
       author: post.author,
       likes: post.likes || [],
+      likeCount: (post.likes || []).length,
+      userHasLiked: userId ? (post.likes || []).some((id: any) => id.toString() === userId.toString()) : false,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       isEdited: post.isEdited || false
@@ -97,7 +128,7 @@ export async function getThread(
       thread: thread ? {
         id: thread._id.toString(),
         title: thread.title,
-        content: thread.content,
+        // No longer including content from thread model
         author: thread.author,
         views: thread.views,
         isPinned: thread.isPinned,
@@ -269,15 +300,15 @@ export async function createThread(
     // Get the actual category ID from the found category
     const categoryId = (category as any)._id;
     
-    // Create new thread
+    // Create new thread with minimal content
     const thread = await Thread.create({
       title,
-      content,
+      content: '', // No longer duplicate content here
       author: session.user.id,
       category: categoryId
     });
     
-    // Create initial post (same content as thread)
+    // Create initial post (this will be the only instance of the content)
     await Post.create({
       content,
       author: session.user.id,

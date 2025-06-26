@@ -15,9 +15,12 @@ export default function ThemeToggle({ label = { dark: "Dark Mode", light: "Light
     setMounted(true);
   }, []);
 
-  // Use a more direct toggle function
+  // Let next-themes handle the theme switching
   const toggleTheme = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+    const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    // Don't manually manipulate document classes, let next-themes handle it
+    console.log('Theme toggled to:', newTheme);
   };
 
   if (!mounted) {

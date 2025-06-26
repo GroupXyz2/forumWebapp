@@ -7,6 +7,7 @@ export interface IThread extends Document {
   author: mongoose.Types.ObjectId | IUser;
   category: mongoose.Types.ObjectId;
   views: number;
+  viewedBy: mongoose.Types.ObjectId[];
   isPinned: boolean;
   isLocked: boolean;
   createdAt: Date;
@@ -16,10 +17,11 @@ export interface IThread extends Document {
 
 const ThreadSchema: Schema = new Schema({
   title: { type: String, required: true },
-  content: { type: String, required: true },
+  content: { type: String, default: '' }, // Not required as content is stored in first post
   author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
   views: { type: Number, default: 0 },
+  viewedBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   isPinned: { type: Boolean, default: false },
   isLocked: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },

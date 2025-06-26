@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { locales } from "@/i18n/settings";
 
 const geistSans = Geist({
@@ -29,13 +28,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-white dark:bg-gray-950 text-black dark:text-white`}
       >
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        {/* ThemeProvider is now only added in locale layouts to avoid duplication */}
+        {children}
       </body>
     </html>
   );

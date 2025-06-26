@@ -2,6 +2,7 @@ import { Locale, locales } from "@/i18n/settings";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 // Import locale translations
 import enTranslations from "@/i18n/locales/en.json";
@@ -34,12 +35,14 @@ export default async function LocaleLayout({
   }
   
   return (
-    <AuthProvider>
-      <Navbar locale={localeValue as Locale} translations={translations[localeValue as keyof typeof translations]} />
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
-      <Footer locale={localeValue as Locale} />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Navbar locale={localeValue as Locale} translations={translations[localeValue as keyof typeof translations]} />
+        <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {children}
+        </main>
+        <Footer locale={localeValue as Locale} />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

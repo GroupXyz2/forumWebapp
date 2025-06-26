@@ -58,6 +58,17 @@
     "user_moderation": "User Moderation",
     "ban_user": "Ban User",
     "unban_user": "Unban User",
+    "homepageSettings": "Homepage Settings",
+    "homepageSettingsDescription": "Customize the main page of your forum",
+    "mainSection": "Main Section",
+    "featuresSection": "Features Section",
+    "buttonsSection": "Buttons",
+    "title": "Title",
+    "slogan": "Slogan",
+    "featureBox": "Feature Box",
+    "featureTitle": "Feature Title",
+    "featureDescription": "Feature Description",
+    "primaryButtonText": "Primary Button Text",
     "mute_user": "Mute User",
     "unmute_user": "Unmute User",
     "warn_user": "Warn User",
@@ -167,8 +178,7 @@
     "slugFormat": "Slug can only contain lowercase letters, numbers, and hyphens",
     "categoryCreated": "Category created successfully",
     "categoryUpdated": "Category updated successfully",
-    "categoryDeleted": "Category deleted successfully",
-    "order": "Order"
+    "categoryDeleted": "Category deleted successfully"
   },
   "common": {
     "order": "Order",
@@ -186,7 +196,10 @@
     "no": "No",
     "confirm": "Confirm",
     "search": "Search",
-    "back": "Back"
+    "back": "Back",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "settingsSaved": "Settings saved successfully"
   },
   "theme": {
     "dark": "Dark Mode",
