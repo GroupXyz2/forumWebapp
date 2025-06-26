@@ -815,6 +815,15 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
             </div>
           </div>
           
+          {settings.filter(s => s.type === 'image').map(setting => (
+  <input
+    key={setting.key}
+    type="hidden"
+    name={setting.key}
+    value={getSettingStringValue(setting.value, locale)}
+  />
+))}
+          
           <div className="flex justify-end">
             <button 
               type="submit" 
