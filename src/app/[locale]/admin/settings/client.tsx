@@ -27,13 +27,27 @@ const tr = (locale: string, key: string, section = 'admin') => {
 
 // Helper function to safely extract setting value based on locale
 const getSettingStringValue = (value: any, locale: string): string => {
+  // Handle undefined or null
   if (value === null || value === undefined) return '';
+  
+  // Handle simple strings
   if (typeof value === 'string') return value;
-  if (typeof value === 'object') {
+  
+  // Handle multilingual objects with en/de keys
+  if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
     // For multilingual objects
     const localeStr = locale === 'de' ? 'de' : 'en';
-    return value[localeStr] || value.en || '';
+    
+    // Check if it has locale keys
+    if (value.en !== undefined || value.de !== undefined) {
+      return value[localeStr] || value.en || '';
+    }
+    
+    // For other objects, avoid rendering them directly
+    return '';
   }
+  
+  // Convert any other types to string
   return String(value);
 };
 
@@ -576,12 +590,7 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
               {/* Homepage Background */}
               <BrandingImageUploader
                 settingKey="homepage_background"
-                currentImageUrl={(() => {
-                  const val = settings.find(s => s.key === 'homepage_background')?.value;
-                  if (!val) return '';
-                  if (typeof val === 'string') return val;
-                  return val[locale as 'en' | 'de'] || val.en || '';
-                })()}
+                currentImageUrl={getSettingStringValue(settings.find(s => s.key === 'homepage_background')?.value, locale)}
                 title={tr(locale, 'homepageBackgroundTitle', 'admin') || 'Homepage Background'}
                 description={tr(locale, 'homepageBackgroundDescription', 'admin') || 'Background image for the homepage (recommended size: 1920x1080px)'}
                 locale={locale as 'en' | 'de'}
@@ -591,12 +600,7 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
               {/* Forum Background */}
               <BrandingImageUploader
                 settingKey="forum_background"
-                currentImageUrl={(() => {
-                  const val = settings.find(s => s.key === 'forum_background')?.value;
-                  if (!val) return '';
-                  if (typeof val === 'string') return val;
-                  return val[locale as 'en' | 'de'] || val.en || '';
-                })()}
+                currentImageUrl={getSettingStringValue(settings.find(s => s.key === 'forum_background')?.value, locale)}
                 title={tr(locale, 'forumBackgroundTitle', 'admin') || 'Forum Background'}
                 description={tr(locale, 'forumBackgroundDescription', 'admin') || 'Background image for forum pages (recommended size: 1920x1080px)'}
                 locale={locale as 'en' | 'de'}

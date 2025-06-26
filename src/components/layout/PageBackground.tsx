@@ -12,13 +12,16 @@ export default function PageBackground({ backgroundUrl, children }: PageBackgrou
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // Ensure backgroundUrl is a valid string
+  const validBackgroundUrl = backgroundUrl && typeof backgroundUrl === 'string' ? backgroundUrl : '';
+
   if (!mounted) {
-    // Verhindert Hydrationsfehler, indem beim SSR nichts gerendert wird
+    // Prevent hydration errors by not rendering anything during SSR
     return null;
   }
 
-  if (!backgroundUrl) {
-    // Kein Overlay, sondern einfach den Hintergrund per Tailwind setzen
+  if (!validBackgroundUrl) {
+    // No overlay, just set background using Tailwind
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900">
         {children}
@@ -27,13 +30,13 @@ export default function PageBackground({ backgroundUrl, children }: PageBackgrou
   }
 
   const backgroundStyles: CSSProperties = {
-    backgroundImage: `url('${backgroundUrl}')`,
+    backgroundImage: `url('${validBackgroundUrl}')`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundAttachment: 'fixed',
   };
 
-  // Wenn ein Hintergrundbild existiert, KEIN Overlay!
+  // If a background image exists, NO overlay!
   return (
     <div style={backgroundStyles} className="min-h-screen">
       <div className="relative z-10">{children}</div>

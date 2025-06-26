@@ -16,7 +16,12 @@ export function useBrandingSettings(locale: string = 'en'): {
   error: string | null 
 } {
   const [isLoading, setIsLoading] = useState(true);
-  const [settings, setSettings] = useState<BrandingSettings>({});
+  const [settings, setSettings] = useState<BrandingSettings>({
+    branding_logo: '',
+    branding_banner: '',
+    homepage_background: '',
+    forum_background: ''
+  });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,19 +41,53 @@ export function useBrandingSettings(locale: string = 'en'): {
         const data = await response.json();
         
         if (data.success && Array.isArray(data.settings)) {
-          // Convert array of settings to an object with key-value pairs
-          const brandingSettings: BrandingSettings = {};
+          // Create a starting object with empty strings for all branding keys
+          const brandingSettings: BrandingSettings = {
+            branding_logo: '',
+            branding_banner: '',
+            homepage_background: '',
+            forum_background: ''
+          };
           
-          data.settings.forEach((setting: any) => {
-            // Handle multilingual values
-            if (setting.value && typeof setting.value === 'object' && (setting.value.en || setting.value.de)) {
-              // Extract value for current locale, fallback to english, or empty string
-              const localeStr = locale === 'de' ? 'de' : 'en';
-              brandingSettings[setting.key] = setting.value[localeStr] || setting.value.en || '';
-            } else {
-              brandingSettings[setting.key] = setting.value || '';
+          // Process each setting safely
+          for (const setting of data.settings) {
+            try {
+              // Skip settings with null/undefined keys
+              if (!setting || !setting.key) continue;
+              
+              // Initialize with empty string for safety
+              let processedValue = '';
+              
+              // Handle multilingual objects 
+              if (setting.value && typeof setting.value === 'object' && !Array.isArray(setting.value)) {
+                if (setting.value.en !== undefined || setting.value.de !== undefined) {
+                  // Extract value for current locale, fallback to english
+                  const localeStr = locale === 'de' ? 'de' : 'en';
+                  processedValue = setting.value[localeStr] || setting.value.en || '';
+                } else {
+                  console.warn(`Setting ${setting.key} has an object value that is not a valid multilingual object`);
+                }
+              } else if (setting.value === null || setting.value === undefined) {
+                // Keep empty string
+                processedValue = '';
+              } else if (typeof setting.value === 'string') {
+                // Use string directly
+                processedValue = setting.value;
+              } else {
+                // Convert any other type to string
+                try {
+                  processedValue = String(setting.value);
+                } catch (e) {
+                  console.error(`Failed to convert setting ${setting.key} to string:`, e);
+                }
+              }
+              
+              // Assign the processed value to the settings object
+              brandingSettings[setting.key] = processedValue;
+            } catch (err) {
+              console.error(`Error processing setting ${setting?.key}:`, err);
             }
-          });
+          }
           
           setSettings(brandingSettings);
         } else {

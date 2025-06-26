@@ -42,7 +42,15 @@ export default async function LocaleLayout({
     <ThemeProvider>
       <AuthProvider>
         <BrandingProvider locale={localeValue} isHomepage={isHomepage}>
-          <Navbar locale={localeValue as Locale} translations={translations[localeValue as keyof typeof translations]} />
+          <Navbar 
+            locale={localeValue as Locale} 
+            translations={{
+              app_name: translations[localeValue as keyof typeof translations].app_name || "Forum",
+              navigation: translations[localeValue as keyof typeof translations].navigation || {},
+              auth: translations[localeValue as keyof typeof translations].auth || {},
+              theme: translations[localeValue as keyof typeof translations].theme || {}
+            }} 
+          />
           <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}
           </main>
