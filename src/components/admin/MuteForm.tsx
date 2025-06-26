@@ -4,7 +4,7 @@ import { useState } from "react";
 import { muteUser, unmuteUser } from "@/actions/adminActions";
 import { formatDate } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useAdminTranslations } from "@/hooks/useAdminTranslations";
 
 interface MuteFormProps {
   userId: string;
@@ -28,7 +28,7 @@ export default function MuteForm({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const router = useRouter();
-  const t = useTranslations('Admin');
+  const t = useAdminTranslations(locale);
   
   const handleUnmute = async () => {
     setIsSubmitting(true);

@@ -21,7 +21,9 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    const userId = params.userId;
+    // Await params before using
+    const awaitedParams = await params;
+    const userId = awaitedParams.userId;
     
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(userId)) {

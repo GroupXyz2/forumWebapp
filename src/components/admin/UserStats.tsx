@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { formatDate } from '@/lib/utils';
-import { useTranslations } from 'next-intl';
+import { useAdminTranslations } from '@/hooks/useAdminTranslations';
 
 interface UserStatsProps {
   userId: string;
@@ -26,7 +26,7 @@ export default function UserStats({ userId, locale }: UserStatsProps) {
   const [stats, setStats] = useState<UserStatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const t = useTranslations('Admin');
+  const t = useAdminTranslations(locale);
 
   useEffect(() => {
     const fetchStats = async () => {

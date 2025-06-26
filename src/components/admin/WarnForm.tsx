@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { warnUser } from "@/actions/adminActions";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useAdminTranslations } from "@/hooks/useAdminTranslations";
 
 interface WarnFormProps {
   userId: string;
@@ -23,7 +23,7 @@ export default function WarnForm({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const router = useRouter();
-  const t = useTranslations('Admin');
+  const t = useAdminTranslations(locale);
   
   const handleWarn = async (e: React.FormEvent) => {
     e.preventDefault();

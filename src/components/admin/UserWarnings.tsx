@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDate } from "@/lib/utils";
-import { useTranslations } from "next-intl";
+import { useAdminTranslations } from "@/hooks/useAdminTranslations";
 
 interface Warning {
   warning: string;
@@ -15,7 +15,7 @@ interface UserWarningsProps {
 }
 
 export default function UserWarnings({ warnings, locale }: UserWarningsProps) {
-  const t = useTranslations('Admin');
+  const t = useAdminTranslations(locale);
   
   if (!warnings || warnings.length === 0) {
     return (
