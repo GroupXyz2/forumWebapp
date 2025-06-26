@@ -19,6 +19,7 @@ export async function initializeSettings() {
   if (count === 0) {
     // Create default settings
     const defaultSettings = [
+      // Homepage settings
       {
         key: 'homepage_title',
         value: {
@@ -99,6 +100,34 @@ export async function initializeSettings() {
         },
         type: 'string',
         scope: 'homepage',
+      },
+      // Content page settings
+      {
+        key: 'page_terms',
+        value: {
+          en: "<h2>Terms of Service</h2><p>This is a placeholder for the terms of service. As an admin, you can edit this content in the settings panel.</p><p>The terms of service typically include information about how users may use the forum, rules of conduct, and legal disclaimers.</p>",
+          de: "<h2>Nutzungsbedingungen</h2><p>Dies ist ein Platzhalter für die Nutzungsbedingungen. Als Administrator können Sie diesen Inhalt im Einstellungsbereich bearbeiten.</p><p>Die Nutzungsbedingungen enthalten in der Regel Informationen darüber, wie Benutzer das Forum nutzen dürfen, Verhaltensregeln und rechtliche Hinweise.</p>"
+        },
+        type: 'text',
+        scope: 'content',
+      },
+      {
+        key: 'page_privacy',
+        value: {
+          en: "<h2>Privacy Policy</h2><p>This is a placeholder for the privacy policy. As an admin, you can edit this content in the settings panel.</p><p>The privacy policy typically includes information about what user data is collected, how it's used, and how users can control their personal information.</p>",
+          de: "<h2>Datenschutzrichtlinie</h2><p>Dies ist ein Platzhalter für die Datenschutzrichtlinie. Als Administrator können Sie diesen Inhalt im Einstellungsbereich bearbeiten.</p><p>Die Datenschutzrichtlinie enthält in der Regel Informationen darüber, welche Benutzerdaten erfasst werden, wie sie verwendet werden und wie Benutzer ihre persönlichen Informationen kontrollieren können.</p>"
+        },
+        type: 'text',
+        scope: 'content',
+      },
+      {
+        key: 'page_contact',
+        value: {
+          en: "<h2>Contact Us</h2><p>This is a placeholder for the contact information. As an admin, you can edit this content in the settings panel.</p><p>You can include contact details, a contact form, or instructions on how users can get in touch with administrators.</p>",
+          de: "<h2>Kontakt</h2><p>Dies ist ein Platzhalter für die Kontaktinformationen. Als Administrator können Sie diesen Inhalt im Einstellungsbereich bearbeiten.</p><p>Sie können Kontaktdaten, ein Kontaktformular oder Anweisungen angeben, wie Benutzer mit Administratoren in Kontakt treten können.</p>"
+        },
+        type: 'text',
+        scope: 'content',
       },
     ];
     

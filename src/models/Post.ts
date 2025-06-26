@@ -3,7 +3,8 @@ import { IUser } from './User';
 import { IThread } from './Thread';
 
 export interface IPost extends Document {
-  content: string;
+  content: string;       // HTML content for rendering
+  rawContent?: string;   // Original markdown content
   author: mongoose.Types.ObjectId | IUser;
   thread: mongoose.Types.ObjectId | IThread;
   likes: mongoose.Types.ObjectId[];
@@ -13,7 +14,8 @@ export interface IPost extends Document {
 }
 
 const PostSchema: Schema = new Schema({
-  content: { type: String, required: true },
+  content: { type: String, required: true },         // HTML content
+  rawContent: { type: String },                      // Original markdown
   author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   thread: { type: Schema.Types.ObjectId, ref: 'Thread', required: true },
   likes: [{ type: Schema.Types.ObjectId, ref: 'User' }],

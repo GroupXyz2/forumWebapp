@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { createReply } from '@/actions/threadActions';
 import { Locale } from '@/i18n/settings';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, ImageIcon } from 'lucide-react';
+import { countImagesInContent } from '@/lib/contentUtils';
+import ImageUploader from '@/components/forum/ImageUploader';
 
 // Import locale translations
 import enTranslations from '@/i18n/locales/en.json';
@@ -41,10 +43,20 @@ export default function ReplyForm({ threadId, categoryId, locale }: ReplyFormPro
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imageCount, setImageCount] = useState(0);
+  const [imageWarning, setImageWarning] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const router = useRouter();
   const { data: session, status } = useSession();
   
   const t = translations[locale as keyof typeof translations];
+  
+  // Count images whenever content changes
+  useEffect(() => {
+    const count = countImagesInContent(content);
+    setImageCount(count);
+    setImageWarning(count > 1);
+  }, [content]);
   
   // Check if user is banned or muted
   const isBanned = session?.user?.isBanned;
@@ -185,6 +197,23 @@ export default function ReplyForm({ threadId, categoryId, locale }: ReplyFormPro
         </div>
       )}
       
+      {imageWarning && (
+        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded flex items-start gap-2">
+          <ImageIcon className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+          <div className="text-yellow-700 dark:text-yellow-400">
+            <p className="font-medium">
+              {t.forum.image_limit.title}
+            </p>
+            <p className="text-sm">
+              {t.forum.image_limit.message}
+            </p>
+            <p className="text-xs mt-1">
+              {t.forum.image_limit.count.replace('{{count}}', imageCount.toString())}
+            </p>
+          </div>
+        </div>
+      )}
+      
       <div>
         <label htmlFor="content" className="sr-only">
           {t.forum.reply}
@@ -199,12 +228,45 @@ export default function ReplyForm({ threadId, categoryId, locale }: ReplyFormPro
           onChange={(e) => setContent(e.target.value)}
           required
         ></textarea>
+        
+        {/* Image uploader */}
+        <div className="mt-3">
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t.forum.image_upload.title}
+          </p>
+          
+          {uploadError && (
+            <div className="p-3 mb-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-700 dark:text-red-400 text-sm">
+              {uploadError}
+            </div>
+          )}
+          
+          <ImageUploader 
+            locale={locale}
+            onImageUploaded={(imageUrl) => {
+              if (imageUrl) {
+                // Insert the image at the end of the content
+                setContent(prev => {
+                  const newContent = prev.trim() ? 
+                    `${prev}\n\n![${t.forum.image_upload.insert_text}](${imageUrl})` : 
+                    `![${t.forum.image_upload.insert_text}](${imageUrl})`;
+                  return newContent;
+                });
+              }
+            }}
+            onError={(errorMessage) => {
+              setUploadError(errorMessage);
+              // Clear error after 5 seconds
+              setTimeout(() => setUploadError(null), 5000);
+            }}
+          />
+        </div>
       </div>
       
       <div className="flex justify-end">
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || imageWarning}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (

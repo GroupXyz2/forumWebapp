@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import DiscordProvider from "next-auth/providers/discord";
 import { NextAuthOptions } from 'next-auth';
 import User from '@/models/User';
+import BannedAccount from '@/models/BannedAccount';
 import connectToDatabase from '@/lib/db';
 
 // Check for required environment variables
@@ -44,6 +45,29 @@ export const authOptions: NextAuthOptions = {
             providerId: account.providerAccountId
           });
           
+          // Check if this Discord ID or email is in the banned accounts list
+          const bannedAccount = await BannedAccount.findOne({
+            $or: [
+              { discordId: account.providerAccountId },
+              { email: user.email }
+            ]
+          });
+          
+          if (bannedAccount) {
+            console.log('Blocked sign-in attempt from banned account:', {
+              discordId: account.providerAccountId,
+              email: user.email
+            });
+            
+            // Set a banned flag on the token
+            token.isBannedAccount = true;
+            token.banReason = bannedAccount.reason;
+            token.bannedUntil = bannedAccount.bannedUntil;
+            
+            // We'll handle this in the session callback
+            return token;
+          }
+          
           // Check if user exists in database
           let dbUser = await User.findOne({ discordId: account.providerAccountId });
           
@@ -75,6 +99,16 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      // Check for banned account flag from jwt callback
+      if (token.isBannedAccount === true) {
+        if (session.user) {
+          session.user.isBanned = true;
+          session.user.banReason = token.banReason as string || 'Account suspended due to prior violations';
+          session.user.bannedUntil = token.bannedUntil as Date;
+        }
+        return session;
+      }
+      
       // Add role to client-side session
       if (token && session.user) {
         // Check if user is banned

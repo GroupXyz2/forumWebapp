@@ -29,10 +29,36 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Dieses Script läuft vor der React-Hydratisierung, um das Flackern zu verhindern */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  // Setze das Theme basierend auf localStorage oder 'dark' als Fallback
+                  const storedTheme = localStorage.getItem('theme');
+                  document.documentElement.classList.toggle('dark', 
+                    storedTheme === 'dark' || (!storedTheme && true) // Default zu dark
+                  );
+                  console.log('[Theme Script] Initial theme applied:', 
+                    storedTheme || 'default:dark', 
+                    'Dark class?', document.documentElement.classList.contains('dark')
+                  );
+                } catch (e) {
+                  console.error('[Theme Script] Error applying theme:', e);
+                  // Bei Fehler sicherstellen, dass Dark-Modus als Fallback aktiviert ist
+                  document.documentElement.classList.add('dark');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-white dark:bg-gray-950 text-black dark:text-white`}
       >
-        {/* ThemeProvider is now only added in locale layouts to avoid duplication */}
+        {/* ThemeProvider ist in den Locale-Layouts enthalten */}
         {children}
       </body>
     </html>

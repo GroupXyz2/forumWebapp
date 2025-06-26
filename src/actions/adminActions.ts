@@ -5,11 +5,13 @@ import Thread from '@/models/Thread';
 import Post from '@/models/Post';
 import User from '@/models/User';
 import Category from '@/models/Category';
+import BannedAccount from '@/models/BannedAccount';
 import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import mongoose from 'mongoose';
 import { createAuditLog } from './auditActions';
+import { deleteUploadedImages } from '@/lib/serverOnly/deleteUploadedImages';
 
 // Helper function to check if user is admin or moderator
 async function checkModeratorPermissions() {
@@ -161,7 +163,15 @@ export async function deleteThread(threadId: string) {
     
     const categoryId = thread.category;
     
-    // Delete all posts associated with this thread first
+    // Find all posts associated with this thread to clean up images
+    const posts = await Post.find({ thread: threadId });
+    
+    // Delete images from all posts in the thread
+    for (const post of posts) {
+      await deleteUploadedImages(post.content);
+    }
+    
+    // Delete all posts associated with this thread
     await Post.deleteMany({ thread: threadId });
     
     // Then delete the thread
@@ -223,6 +233,10 @@ export async function deletePost(postId: string) {
         message: 'Cannot delete the first post in a thread. Delete the entire thread instead.'
       };
     }
+    
+    // Delete any uploaded images associated with the post content
+    // Use rawContent if available (original markdown), otherwise fall back to content (HTML)
+    await deleteUploadedImages(post.rawContent || post.content);
     
     // Delete the post
     await Post.deleteOne({ _id: postId });
@@ -536,6 +550,22 @@ export async function banUser(userId: string, reason: string, duration?: number)
       { duration, bannedUntil: bannedUntil ? bannedUntil.toISOString() : null }
     );
     
+    // Add to banned accounts collection to prevent re-registration
+    await BannedAccount.findOneAndUpdate(
+      { discordId: user.discordId }, // Look for existing record
+      {
+        discordId: user.discordId,
+        email: user.email,
+        reason: reason,
+        bannedAt: new Date(),
+        bannedUntil: bannedUntil || undefined,
+        bannedBy: auth.user?.id || userId, // Fallback to the banned user's ID if auth.user is undefined
+        bannedUsername: user.name,
+        isAccountDeletion: false // This wasn't from a deletion
+      },
+      { upsert: true, new: true } // Create if doesn't exist, return updated doc
+    );
+    
     return {
       success: true,
       message: bannedUntil 
@@ -594,6 +624,14 @@ export async function unbanUser(userId: string) {
       userId,
       { unbanned: true }
     );
+    
+    // Remove from banned accounts collection to allow registration again
+    await BannedAccount.deleteMany({
+      $or: [
+        { discordId: user.discordId },
+        { email: user.email }
+      ]
+    });
     
     return {
       success: true,

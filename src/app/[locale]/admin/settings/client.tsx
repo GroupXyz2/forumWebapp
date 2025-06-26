@@ -65,22 +65,37 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/${locale}/api/admin/settings?scope=homepage`, {
-        headers: {
-          'Cache-Control': 'no-cache'
-        }
-      });
+      // Fetch both homepage and content settings
+      const [homepageResponse, contentResponse] = await Promise.all([
+        fetch(`/${locale}/api/admin/settings?scope=homepage`, {
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        }),
+        fetch(`/${locale}/api/admin/settings?scope=content`, {
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        })
+      ]);
       
-      if (!response.ok) {
-        throw new Error(`Failed to fetch settings: ${response.status} ${response.statusText}`);
+      if (!homepageResponse.ok || !contentResponse.ok) {
+        throw new Error(`Failed to fetch settings`);
       }
       
-      const data = await response.json();
-      if (data && Array.isArray(data.settings)) {
-        setSettings(data.settings);
+      const homepageData = await homepageResponse.json();
+      const contentData = await contentResponse.json();
+      
+      const allSettings = [
+        ...(Array.isArray(homepageData.settings) ? homepageData.settings : []),
+        ...(Array.isArray(contentData.settings) ? contentData.settings : [])
+      ];
+      
+      if (allSettings.length > 0) {
+        setSettings(allSettings);
       } else {
         setSettings([]);
-        console.warn('Received invalid settings data:', data);
+        console.warn('Received invalid settings data');
       }
     } catch (err) {
       setError('Error loading settings');
@@ -152,13 +167,12 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-5xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">{tr(locale, 'homepageSettings', 'admin') || 'Homepage Settings'}</h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          {tr(locale, 'homepageSettingsDescription', 'admin') || 'Customize the main page of your forum'}
-        </p>
-      </div>
+    <div className="container mx-auto p-4 max-w-5xl">          <div className="mb-6">
+            <h1 className="text-2xl font-bold">{tr(locale, 'siteSettings', 'admin') || 'Site Settings'}</h1>
+            <p className="text-gray-500 dark:text-gray-400">
+              {tr(locale, 'siteSettingsDescription', 'admin') || 'Customize the pages and content of your forum'}
+            </p>
+          </div>
 
       {loading ? (
         <div className="flex justify-center items-center h-64">{tc(locale, 'loading')}</div>

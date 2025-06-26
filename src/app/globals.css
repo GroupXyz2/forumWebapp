@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
+/* Grundeinstellungen für den Light-Mode */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-bg: #ffffff; 
+  --card-border: #e5e7eb;
+  --primary-bg: #f3f4f6;
+  --primary-fg: #1f2937;
+  --secondary-bg: #eff6ff;
+  --secondary-fg: #1e40af;
 }
 
 @theme inline {
@@ -12,15 +19,91 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Explizite Dark-Mode-Variablen mit verbessertem Kontrast */
+.dark {
+  --background: #090909; /* Dunklerer Hintergrund für besseren Kontrast */
+  --foreground: #ffffff; /* Hellerer Text für mehr Kontrast */
+  --card-bg: #1a2433; /* Dunklere, aber erkennbare Kartenfarbe */
+  --card-border: #2d3748; /* Deutlichere Ränder */
+  --primary-bg: #2d3748; /* Dunklerer Primärhintergrund */
+  --primary-fg: #ffffff; /* Weißer Text für maximalen Kontrast */
+  --secondary-bg: #1e40af; /* Kräftigeres Blau für bessere Sichtbarkeit */
+  --secondary-fg: #ffffff; /* Weißer Text auf blauen Elementen */
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Verhindern von Flimmern bei Themenwechsel */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Grundstyling */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans, Arial, Helvetica, sans-serif);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Verbesserte Kontrastregeln für den Dark Mode */
+.dark .bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
+  background-color: var(--primary-bg) !important;
+}
+
+.dark .bg-gray-200 {
+  background-color: #374151 !important; /* Dunkleres Grau für besseren Kontrast */
+}
+
+.dark .bg-gray-700 {
+  background-color: #1a202c !important; /* Dunkleres Grau mit mehr Tiefe */
+}
+
+.dark .bg-gray-800 {
+  background-color: #141a25 !important; /* Noch dunkler für mehr Tiefe */
+}
+
+.dark .bg-gray-900 {
+  background-color: #0d131d !important; /* Fast schwarz mit blauem Unterton */
+}
+
+/* Verbesserte Kontrastregeln für Ränder */
+.dark .border-gray-200 {
+  border-color: var(--card-border) !important;
+}
+
+.dark .border-gray-300 {
+  border-color: #4a5568 !important; /* Deutlichere Ränder */
+}
+
+/* Text-Kontrast verbessern */
+.dark .text-gray-400 {
+  color: #cbd5e0 !important; /* Helleres Grau für bessere Lesbarkeit */
+}
+
+.dark .text-gray-500 {
+  color: #e2e8f0 !important;
+}
+
+.dark .text-gray-600, 
+.dark .text-gray-700 {
+  color: #edf2f7 !important; /* Sehr heller Grauton, fast weiß */
+}
+
+.dark .text-gray-900, 
+.dark .text-black {
+  color: #ffffff !important; /* Maximaler Kontrast für Überschriften */
+}
+
+/* Erhöhter Kontrast für Aktionselemente */
+.dark .bg-blue-600 {
+  background-color: #3182ce !important; /* Helleres, kräftigeres Blau */
+}
+
+.dark .text-blue-400 {
+  color: #63b3ed !important; /* Helleres Blau für bessere Sichtbarkeit */
+}
+

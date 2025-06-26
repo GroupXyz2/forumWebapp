@@ -2,11 +2,29 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { Locale, locales } from '@/i18n/settings';
+import dynamic from 'next/dynamic';
+
+// Dynamically import components
+const DeleteAccountFormDynamic = dynamic(
+  () => import('@/components/users/DeleteAccountForm'),
+  { 
+    loading: () => <div>Loading account management options...</div>,
+    ssr: false 
+  }
+);
+
+const RecentActivityDynamic = dynamic(
+  () => import('@/components/users/RecentActivity'),
+  {
+    loading: () => <div>Loading activity...</div>,
+    ssr: false
+  }
+);
 
 // Import locale translations
 import enTranslations from '@/i18n/locales/en.json';
@@ -174,9 +192,22 @@ export default function ProfilePage({
             {t.profile.activity}
           </h2>
           <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-              {t.profile.activity_stats_coming_soon}
-            </p>
+            <Suspense fallback={<div className="py-8 text-center text-gray-500 dark:text-gray-400">Loading activity...</div>}>
+              <RecentActivityDynamic 
+                userId={session.user.id}
+                locale={localeValue}
+                translations={{
+                  loading: t.profile.recent_activity.loading,
+                  error: t.profile.recent_activity.error,
+                  noActivity: t.profile.recent_activity.no_activity,
+                  postedIn: t.profile.recent_activity.posted_in,
+                  createdThread: t.profile.recent_activity.created_thread,
+                  posted: t.profile.recent_activity.posted,
+                  created: t.profile.recent_activity.created,
+                  viewMore: t.profile.recent_activity.view_more
+                }}
+              />
+            </Suspense>
           </div>
         </div>
         
@@ -220,6 +251,19 @@ export default function ProfilePage({
         >
           {t.profile.back_to_forum}
         </Link>
+      </div>
+      
+      {/* Account Deletion Section */}
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mt-6">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          {t.profile.account_management}
+        </h2>
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          {/* Import and use DeleteAccountForm */}
+          <Suspense fallback={<div>Loading account management options...</div>}>
+            <DeleteAccountFormDynamic locale={localeValue} />
+          </Suspense>
+        </div>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import mongoose from 'mongoose';
+import { hasExcessiveImages, markdownToHtml } from '@/lib/contentUtils';
 
 // Define types for better type safety
 type ThreadWithDetails = {
@@ -114,7 +115,8 @@ export async function getThread(
     // Format posts and handle potential null/undefined posts
     const formattedPosts = Array.isArray(posts) ? posts.map((post: any) => ({
       id: post._id.toString(),
-      content: post.content,
+      content: post.content,     // HTML content for rendering
+      rawContent: post.rawContent || post.content, // Original markdown if available
       author: post.author,
       likes: post.likes || [],
       likeCount: (post.likes || []).length,
@@ -180,6 +182,15 @@ export async function createReply(
         post: null
       };
     }
+    
+    // Check if content has more than one image
+    if (hasExcessiveImages(content, 1)) {
+      return {
+        success: false,
+        message: 'Posts can only include a maximum of 1 image', // Will be shown in the user's locale in the UI
+        post: null
+      };
+    }
 
     // Check if thread exists and is not locked
     const thread = await Thread.findById(threadId);
@@ -199,9 +210,13 @@ export async function createReply(
       };
     }
     
+    // Convert Markdown to HTML for storage
+    const htmlContent = markdownToHtml(content);
+    
     // Create new post
     const post = await Post.create({
-      content,
+      content: htmlContent,    // Store as HTML
+      rawContent: content,     // Store original markdown
       author: session.user.id,
       thread: threadId
     });
@@ -278,6 +293,15 @@ export async function createThread(
       };
     }
     
+    // Check if content has more than one image
+    if (hasExcessiveImages(content, 1)) {
+      return {
+        success: false,
+        message: 'Thread content can only include a maximum of 1 image', // Will be shown in the user's locale in the UI
+        threadId: null
+      };
+    }
+    
     // Check if the input is a slug or an ID
     let category;
     
@@ -308,9 +332,13 @@ export async function createThread(
       category: categoryId
     });
     
+    // Convert Markdown to HTML for storage
+    const htmlContent = markdownToHtml(content);
+    
     // Create initial post (this will be the only instance of the content)
     await Post.create({
-      content,
+      content: htmlContent,    // Store as HTML
+      rawContent: content,     // Store original markdown
       author: session.user.id,
       thread: thread._id
     });

@@ -39,7 +39,25 @@
     "thread_deleted": "Thema wurde erfolgreich gelöscht",
     "post_deleted": "Beitrag wurde erfolgreich gelöscht",
     "confirm_delete_thread": "Sind Sie sicher, dass Sie dieses Thema löschen möchten? Dadurch werden das Thema und alle zugehörigen Beiträge dauerhaft entfernt.",
-    "confirm_delete_post": "Sind Sie sicher, dass Sie diesen Beitrag löschen möchten?"
+    "confirm_delete_post": "Sind Sie sicher, dass Sie diesen Beitrag löschen möchten?",
+    "image_limit": {
+      "title": "Bildlimit überschritten",
+      "message": "Beiträge können maximal 1 Bild enthalten. Bitte entfernen Sie zusätzliche Bilder.",
+      "count": "Aktuelle Anzahl: {{count}} Bilder",
+      "error": "Beiträge können maximal 1 Bild enthalten"
+    },
+    "image_upload": {
+      "title": "Bild hinzufügen",
+      "button": "Bild hochladen",
+      "uploading": "Wird hochgeladen...",
+      "drag_here": "Bild hierher ziehen oder klicken zum Hochladen",
+      "remove": "Bild entfernen",
+      "limit_message": "Maximal 1 Bild pro Beitrag erlaubt",
+      "type_error": "Nur JPEG, PNG, GIF und WEBP Bilder sind erlaubt",
+      "size_error": "Maximale Dateigröße ist 2MB",
+      "upload_error": "Fehler beim Hochladen des Bildes",
+      "insert_text": "Bild erfolgreich hochgeladen"
+    }
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -173,21 +191,45 @@
     "back": "Zurück",
     "saveChanges": "Änderungen speichern",
     "saving": "Speichern...",
-    "settingsSaved": "Einstellungen erfolgreich gespeichert"
+    "settingsSaved": "Einstellungen erfolgreich gespeichert",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutzrichtlinie",
+    "contact": "Kontakt",
+    "backToHome": "Zurück zur Startseite",
+    "termsPlaceholder": "<h2>Nutzungsbedingungen</h2><p>Dies ist ein Platzhalter für die Nutzungsbedingungen. Als Administrator können Sie diesen Inhalt im Einstellungsbereich bearbeiten.</p><p>Die Nutzungsbedingungen enthalten in der Regel Informationen darüber, wie Benutzer das Forum nutzen dürfen, Verhaltensregeln und rechtliche Hinweise.</p>",
+    "privacyPlaceholder": "<h2>Datenschutzrichtlinie</h2><p>Dies ist ein Platzhalter für die Datenschutzrichtlinie. Als Administrator können Sie diesen Inhalt im Einstellungsbereich bearbeiten.</p><p>Die Datenschutzrichtlinie enthält in der Regel Informationen darüber, welche Benutzerdaten erfasst werden, wie sie verwendet werden und wie Benutzer ihre persönlichen Informationen kontrollieren können.</p>",
+    "contactPlaceholder": "<h2>Kontakt</h2><p>Dies ist ein Platzhalter für die Kontaktinformationen. Als Administrator können Sie diesen Inhalt im Einstellungsbereich bearbeiten.</p><p>Sie können Kontaktdaten, ein Kontaktformular oder Anweisungen angeben, wie Benutzer mit Administratoren in Kontakt treten können.</p>"
   },
   "theme": {
     "dark": "Dunkelmodus",
     "light": "Hellmodus"
   },
   "profile": {
-    "activity": "Aktivität",
-    "activity_stats_coming_soon": "Aktivitätsstatistiken werden bald verfügbar sein",
-    "account_details": "Kontodaten",
     "username": "Benutzername",
     "email": "E-Mail",
+    "account_details": "Kontodetails",
     "account_type": "Kontotyp",
+    "activity": "Aktivität",
+    "activity_stats_coming_soon": "Aktivitätsstatistiken demnächst verfügbar",
     "member_since": "Mitglied seit",
-    "back_to_forum": "Zurück zum Forum"
+    "back_to_forum": "Zurück zum Forum",
+    "account_management": "Kontoverwaltung",
+    "delete_account_warning": "Warnung: Diese Aktion kann nicht rückgängig gemacht werden",
+    "delete_account_confirm": "Ja, mein Konto löschen",
+    "delete_account": "Konto löschen",
+    "delete_account_processing": "Konto wird gelöscht...",
+    "delete_account_error": "Beim Löschen Ihres Kontos ist ein Fehler aufgetreten",
+    "delete_account_success": "Ihr Konto wurde erfolgreich gelöscht",
+    "recent_activity": {
+      "loading": "Aktivität wird geladen...",
+      "error": "Fehler beim Laden der Aktivität",
+      "no_activity": "Keine kürzliche Aktivität gefunden",
+      "posted_in": "Hat kommentiert in",
+      "created_thread": "Hat Thema erstellt",
+      "posted": "Kommentiert",
+      "created": "Erstellt",
+      "view_more": "Mehr ansehen"
+    }
   },
   "roles": {
     "admin": "Administrator",

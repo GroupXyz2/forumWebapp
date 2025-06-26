@@ -10,19 +10,31 @@ import SiteSetting from "@/models/SiteSetting";
  */
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session?.user || session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    
+    // Connect to database first
     await connectToDatabase();
     
-    // Check if a scope is provided as a query parameter
+    // Check if a scope or key is provided as a query parameter
     const url = new URL(request.url);
     const scope = url.searchParams.get('scope');
+    const key = url.searchParams.get('key');
     
-    const query = scope ? { scope } : {};
+    // For 'content' scope or specific content page keys, we don't require admin auth
+    const isPublicRequest = 
+      scope === 'content' || 
+      (key && ['page_terms', 'page_privacy', 'page_contact'].includes(key));
+    
+    // For non-public requests, verify admin access
+    if (!isPublicRequest) {
+      const session = await getServerSession(authOptions);
+      if (!session?.user || session.user.role !== 'admin') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+    
+    let query = {};
+    if (scope) query = { scope };
+    if (key) query = { key };
+    
     const settings = await SiteSetting.find(query).sort({ key: 1 }).lean();
     
     return NextResponse.json({ settings });
