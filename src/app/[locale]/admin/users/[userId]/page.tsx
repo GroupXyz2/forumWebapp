@@ -9,19 +9,23 @@ import MuteForm from '@/components/admin/MuteForm';
 import WarnForm from '@/components/admin/WarnForm';
 import RoleForm from '@/components/admin/RoleForm';
 import UserWarnings from '@/components/admin/UserWarnings';
+import UserStats from '@/components/admin/UserStats';
 import { redirect } from 'next/navigation';
+import { use } from 'react';
 
 export default async function UserDetailPage({
-  params
+  params: paramsPromise
 }: {
-  params: { locale: string; userId: string }
+  params: Promise<{ locale: string; userId: string }>
 }) {
+  const params = use(paramsPromise);
   const session = await getSession();
   const t = await getTranslations('Admin');
+  const locale = params.locale;
   
   // Check if user is admin or moderator
   if (!session?.user || !['admin', 'moderator'].includes(session.user.role)) {
-    redirect(`/${params.locale}/forum`);
+    redirect(`/${locale}/forum`);
   }
   
   const { userId } = params;
@@ -34,7 +38,7 @@ export default async function UserDetailPage({
         <p className="text-red-500">{message}</p>
         <div className="mt-4">
           <Link
-            href={`/${params.locale}/admin/users`}
+            href={`/${locale}/admin/users`}
             className="text-blue-500 hover:text-blue-700"
           >
             &larr; {t('backToUserList')}
@@ -56,7 +60,7 @@ export default async function UserDetailPage({
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">{t('userManagement')}</h1>
         <Link
-          href={`/${params.locale}/admin/users`}
+          href={`/${locale}/admin/users`}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
         >
           {t('backToUserList')}
@@ -140,7 +144,7 @@ export default async function UserDetailPage({
             bannedUntil={user.bannedUntil}
             banReason={user.banReason}
             isDisabled={isTargetHigherRole}
-            locale={params.locale}
+            locale={locale}
           />
         </div>
         
@@ -154,7 +158,7 @@ export default async function UserDetailPage({
             isMuted={isMuted} 
             mutedUntil={user.mutedUntil}
             isDisabled={isTargetHigherRole}
-            locale={params.locale}
+            locale={locale}
           />
         </div>
       </div>
@@ -167,7 +171,7 @@ export default async function UserDetailPage({
             userId={user.id} 
             warningCount={user.warningCount}
             isDisabled={isTargetHigherRole}
-            locale={params.locale}
+            locale={locale}
           />
         </div>
         
@@ -178,7 +182,7 @@ export default async function UserDetailPage({
             userId={user.id} 
             currentRole={user.role} 
             isDisabled={!isAdmin || user.id === session.user.id}
-            locale={params.locale}
+            locale={locale}
           />
           {!isAdmin && (
             <p className="text-yellow-500 text-sm mt-2">
@@ -194,10 +198,13 @@ export default async function UserDetailPage({
       </div>
       
       {/* Warning History */}
-      <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+      <div className="bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
         <h3 className="text-lg font-bold mb-4">{t('warningHistory')}</h3>
-        <UserWarnings warnings={user.warnings || []} locale={params.locale} />
+        <UserWarnings warnings={user.warnings || []} locale={locale} />
       </div>
+      
+      {/* User Stats and Activity */}
+      <UserStats userId={user.id} locale={locale} />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import mongoose from 'mongoose';
+import { createAuditLog } from './auditActions';
 
 // Helper function to check if user is admin or moderator
 async function checkModeratorPermissions() {
@@ -64,6 +65,17 @@ export async function pinThread(threadId: string, isPinned: boolean) {
     revalidatePath(`/forum/${thread.category}`);
     revalidatePath(`/forum/${thread.category}/thread/${threadId}`);
     
+    // Create audit log
+    await createAuditLog(
+      isPinned ? 'thread_pinned' : 'thread_unpinned',
+      'thread',
+      threadId,
+      {
+        categoryId: thread.category.toString(),
+        isPinned
+      }
+    );
+    
     return {
       success: true,
       message: isPinned 
@@ -104,6 +116,15 @@ export async function lockThread(threadId: string, isLocked: boolean) {
     // Revalidate both the category page and the thread page
     revalidatePath(`/forum/${thread.category}`);
     revalidatePath(`/forum/${thread.category}/thread/${threadId}`);
+    
+    // Create audit log
+    await createAuditLog(
+      isLocked ? 'thread_locked' : 'thread_unlocked',
+      'thread',
+      threadId,
+      { isLocked },
+      { categoryId: thread.category.toString() }
+    );
     
     return {
       success: true,
@@ -148,6 +169,15 @@ export async function deleteThread(threadId: string) {
     
     // Revalidate the category page
     revalidatePath(`/forum/${categoryId}`);
+    
+    // Create audit log
+    await createAuditLog(
+      'thread_deleted',
+      'thread',
+      threadId,
+      { deleted: true },
+      { categoryId: categoryId.toString() }
+    );
     
     return {
       success: true,
@@ -203,6 +233,15 @@ export async function deletePost(postId: string) {
     const threadId = threadData._id;
     
     revalidatePath(`/forum/${categoryId}/thread/${threadId}`);
+    
+    // Create audit log
+    await createAuditLog(
+      'post_deleted',
+      'post',
+      postId,
+      { deleted: true },
+      { threadId, categoryId }
+    );
     
     return {
       success: true,
@@ -488,6 +527,15 @@ export async function banUser(userId: string, reason: string, duration?: number)
     revalidatePath(`/admin/users`);
     revalidatePath(`/admin/users/${userId}`);
     
+    // Create audit log
+    await createAuditLog(
+      'user_banned',
+      'user',
+      userId,
+      { reason },
+      { duration, bannedUntil: bannedUntil ? bannedUntil.toISOString() : null }
+    );
+    
     return {
       success: true,
       message: bannedUntil 
@@ -538,6 +586,14 @@ export async function unbanUser(userId: string) {
     // Revalidate user-related paths
     revalidatePath(`/admin/users`);
     revalidatePath(`/admin/users/${userId}`);
+    
+    // Create audit log
+    await createAuditLog(
+      'user_unbanned',
+      'user',
+      userId,
+      { unbanned: true }
+    );
     
     return {
       success: true,
@@ -598,6 +654,15 @@ export async function muteUser(userId: string, duration: number) {
     revalidatePath(`/admin/users`);
     revalidatePath(`/admin/users/${userId}`);
     
+    // Create audit log
+    await createAuditLog(
+      'user_muted',
+      'user',
+      userId,
+      { isMuted: true },
+      { duration, mutedUntil: mutedUntil ? mutedUntil.toISOString() : null }
+    );
+    
     return {
       success: true,
       message: `User has been muted until ${mutedUntil.toLocaleString()}`
@@ -645,6 +710,14 @@ export async function unmuteUser(userId: string) {
     // Revalidate user-related paths
     revalidatePath(`/admin/users`);
     revalidatePath(`/admin/users/${userId}`);
+    
+    // Create audit log
+    await createAuditLog(
+      'user_unmuted',
+      'user',
+      userId,
+      { isMuted: false }
+    );
     
     return {
       success: true,
@@ -714,6 +787,15 @@ export async function warnUser(userId: string, warning: string) {
     revalidatePath(`/admin/users`);
     revalidatePath(`/admin/users/${userId}`);
     
+    // Create audit log
+    await createAuditLog(
+      'user_warned',
+      'user',
+      userId,
+      { warning },
+      { warningCount: user.warningCount }
+    );
+    
     return {
       success: true,
       message: 'Warning has been added to the user'
@@ -763,6 +845,15 @@ export async function changeUserRole(userId: string, newRole: 'admin' | 'moderat
     // Revalidate user-related paths
     revalidatePath(`/admin/users`);
     revalidatePath(`/admin/users/${userId}`);
+    
+    // Create audit log
+    await createAuditLog(
+      'user_role_changed',
+      'user',
+      userId,
+      { oldRole: user.role, newRole },
+      { changedAt: new Date().toISOString() }
+    );
     
     return {
       success: true,
