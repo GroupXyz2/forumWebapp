@@ -19,8 +19,9 @@ const getTranslation = (
 };
 
 export default async function CategoriesPage({ params }: { params: { locale: string } }) {
+  // Use the params object properly with await for Next.js 15+
+  const { locale } = await Promise.resolve(params);
   const session = await getServerSession(authOptions);
-  const locale = params.locale;
   
   // Check if user is admin (only admins can manage categories)
   if (!session?.user || session.user.role !== 'admin') {
