@@ -19,16 +19,15 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export default async function LocaleLayout({ 
+export default function LocaleLayout({ 
   children, 
   params
 }: {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>
+  params: { locale: string }
 }) {
-  // Await the entire params object first
-  const resolvedParams = await params;
-  const localeValue = resolvedParams.locale;
+  // Get the locale value directly
+  const localeValue = params.locale;
   
   // Check if it's a valid locale
   if (!locales.includes(localeValue as Locale)) {

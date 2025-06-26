@@ -16,7 +16,11 @@ const translations = {
   de: deTranslations,
 };
 
-export default function AuditLogPage({ params }: { params: { locale: Locale } }) {
+type AuditLogPageProps = {
+  params: { locale: Locale };
+};
+
+export default function AuditLogPage({ params }: AuditLogPageProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const locale = params.locale;

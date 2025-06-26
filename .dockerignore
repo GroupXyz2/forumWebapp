@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js build output
+.next
+out
+
+# Local environment files
+.env*.local
+.env.development
+.env.test
+
+# Certificates (mounted at runtime)
+certificates/
+
+# Version control
+.git
+.github
+.gitignore
+
+# OS files
+.DS_Store
+Thumbs.db

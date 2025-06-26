@@ -4,12 +4,19 @@ const { parse } = require('url');
 const next = require('next');
 const fs = require('fs');
 const path = require('path');
+const dotenvPath = fs.existsSync(path.resolve(process.cwd(), '.env.local'))
+  ? path.resolve(process.cwd(), '.env.local')
+  : path.resolve(process.cwd(), '.env');
+require('dotenv').config({ path: dotenvPath });
+console.log('Loaded dotenv file:', dotenvPath);
+console.log('Loaded environment variables:', Object.entries(process.env).filter(([k]) => k.startsWith('USE_SSL') || k.startsWith('SSL_') || k.startsWith('NODE_ENV') || k.startsWith('PORT') || k.startsWith('HOST')));
 
 // Read environment variables
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = process.env.HOST || 'localhost';
 const port = parseInt(process.env.PORT || '3000', 10);
 const useSSL = process.env.USE_SSL === 'true';
+console.log(`Using SSL: ${useSSL}`);
 const sslKeyFile = process.env.SSL_KEY_FILE || './localhost-key.pem';
 const sslCertFile = process.env.SSL_CERT_FILE || './localhost.pem';
 
@@ -35,7 +42,7 @@ app.prepare().then(() => {
       server = createServer(handleRequest);
     }
   } else {
-    console.log('Starting HTTP server');
+    console.log('Starting HTTP server without SSL');
     server = createServer(handleRequest);
   }
 
