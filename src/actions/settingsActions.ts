@@ -129,6 +129,31 @@ export async function initializeSettings() {
         type: 'text',
         scope: 'content',
       },
+      // Branding and background images
+      {
+        key: 'branding_logo',
+        value: '',
+        type: 'image',
+        scope: 'branding',
+      },
+      {
+        key: 'branding_banner',
+        value: '',
+        type: 'image',
+        scope: 'branding',
+      },
+      {
+        key: 'homepage_background',
+        value: '',
+        type: 'image',
+        scope: 'branding',
+      },
+      {
+        key: 'forum_background',
+        value: '',
+        type: 'image',
+        scope: 'branding',
+      },
     ];
     
     await SiteSetting.insertMany(defaultSettings);

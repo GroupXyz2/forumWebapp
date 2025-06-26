@@ -7,7 +7,7 @@ export interface ISiteSetting extends Document {
     de: string;
   } | string;
   type: 'string' | 'text' | 'color' | 'image';
-  scope: 'homepage' | 'global' | 'forum' | 'content';
+  scope: 'homepage' | 'global' | 'forum' | 'content' | 'branding';
   updatedAt: Date;
 }
 
@@ -24,7 +24,7 @@ const SiteSettingSchema: Schema = new Schema({
   },
   scope: { 
     type: String, 
-    enum: ['homepage', 'global', 'forum', 'content'], 
+    enum: ['homepage', 'global', 'forum', 'content', 'branding'], 
     default: 'global' 
   },
   updatedAt: { type: Date, default: Date.now }

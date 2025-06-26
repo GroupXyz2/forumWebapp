@@ -18,9 +18,10 @@ export async function GET(request: NextRequest) {
     const scope = url.searchParams.get('scope');
     const key = url.searchParams.get('key');
     
-    // For 'content' scope or specific content page keys, we don't require admin auth
+    // For 'content' or 'branding' scope or specific content page keys, we don't require admin auth
     const isPublicRequest = 
       scope === 'content' || 
+      scope === 'branding' ||
       (key && ['page_terms', 'page_privacy', 'page_contact'].includes(key));
     
     // For non-public requests, verify admin access

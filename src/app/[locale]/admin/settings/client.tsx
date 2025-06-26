@@ -7,6 +7,8 @@ import { useSession } from 'next-auth/react';
 // Import locale translations directly
 import enTranslations from '@/i18n/locales/en.json';
 import deTranslations from '@/i18n/locales/de.json';
+// Import branding image uploader
+import BrandingImageUploader from '@/components/admin/BrandingImageUploader';
 
 // Helper function for translation
 const tr = (locale: string, key: string, section = 'admin') => {
@@ -21,6 +23,18 @@ const tr = (locale: string, key: string, section = 'admin') => {
   if (typeof value === 'string') return value;
   if (typeof value === 'object' && value !== null) return key;
   return typeof value === 'undefined' ? key : String(value);
+};
+
+// Helper function to safely extract setting value based on locale
+const getSettingStringValue = (value: any, locale: string): string => {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object') {
+    // For multilingual objects
+    const localeStr = locale === 'de' ? 'de' : 'en';
+    return value[localeStr] || value.en || '';
+  }
+  return String(value);
 };
 
 const tc = (locale: string, key: string) => {
@@ -65,8 +79,8 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      // Fetch both homepage and content settings
-      const [homepageResponse, contentResponse] = await Promise.all([
+      // Fetch settings for homepage, content, and branding
+      const [homepageResponse, contentResponse, brandingResponse] = await Promise.all([
         fetch(`/${locale}/api/admin/settings?scope=homepage`, {
           headers: {
             'Cache-Control': 'no-cache'
@@ -76,19 +90,26 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
           headers: {
             'Cache-Control': 'no-cache'
           }
+        }),
+        fetch(`/${locale}/api/admin/settings?scope=branding`, {
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
         })
       ]);
       
-      if (!homepageResponse.ok || !contentResponse.ok) {
+      if (!homepageResponse.ok || !contentResponse.ok || !brandingResponse.ok) {
         throw new Error(`Failed to fetch settings`);
       }
       
       const homepageData = await homepageResponse.json();
       const contentData = await contentResponse.json();
+      const brandingData = await brandingResponse.json();
       
       const allSettings = [
         ...(Array.isArray(homepageData.settings) ? homepageData.settings : []),
-        ...(Array.isArray(contentData.settings) ? contentData.settings : [])
+        ...(Array.isArray(contentData.settings) ? contentData.settings : []),
+        ...(Array.isArray(brandingData.settings) ? brandingData.settings : [])
       ];
       
       if (allSettings.length > 0) {
@@ -247,19 +268,20 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
                         name={setting.key}
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        defaultValue={setting.value as string || ''}
+                        defaultValue={getSettingStringValue(setting.value, locale)}
                       ></textarea>
                     ) : (
                       <input
                         type="text"
                         name={setting.key}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        defaultValue={setting.value as string || ''}
+                        defaultValue={getSettingStringValue(setting.value, locale)}
                       />
                     )
                   )}
-                </div>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
             
             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
@@ -328,7 +350,7 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
                           type="text"
                           name={setting.key}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                          defaultValue={setting.value as string || ''}
+                          defaultValue={getSettingStringValue(setting.value, locale)}
                         />
                       )}
                     </div>
@@ -398,7 +420,7 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
                           type="text"
                           name={setting.key}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                          defaultValue={setting.value as string || ''}
+                          defaultValue={getSettingStringValue(setting.value, locale)}
                         />
                       )}
                     </div>
@@ -468,7 +490,7 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
                           type="text"
                           name={setting.key}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                          defaultValue={setting.value as string || ''}
+                          defaultValue={getSettingStringValue(setting.value, locale)}
                         />
                       )}
                     </div>
@@ -518,11 +540,68 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
                         type="text"
                         name={setting.key}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        defaultValue={setting.value as string || ''}
+                        defaultValue={getSettingStringValue(setting.value, locale)}
                       />
                     )}
                   </div>
                 ))}
+            </div>
+          
+          {/* Branding & Images Section */}
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-semibold mb-4">{tr(locale, 'brandingSection', 'admin') || 'Branding & Images'}</h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">
+              {tr(locale, 'brandingDescription', 'admin') || 'Upload images for site branding and page backgrounds.'}
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Logo Image */}                <BrandingImageUploader
+                settingKey="branding_logo"
+                currentImageUrl={getSettingStringValue(settings.find(s => s.key === 'branding_logo')?.value, locale)}
+                title={tr(locale, 'logoTitle', 'admin') || 'Site Logo'}
+                description={tr(locale, 'logoDescription', 'admin') || 'Upload a logo image for your site (recommended size: 200x60px)'}
+                locale={locale as 'en' | 'de'}
+                onComplete={fetchSettings}
+              />
+              
+              {/* Banner Image */}                <BrandingImageUploader
+                settingKey="branding_banner"
+                currentImageUrl={getSettingStringValue(settings.find(s => s.key === 'branding_banner')?.value, locale)}
+                title={tr(locale, 'bannerTitle', 'admin') || 'Header Banner'}
+                description={tr(locale, 'bannerDescription', 'admin') || 'Upload a banner image for the site header (recommended size: 1200x200px)'}
+                locale={locale as 'en' | 'de'}
+                onComplete={fetchSettings}
+              />
+              
+              {/* Homepage Background */}
+              <BrandingImageUploader
+                settingKey="homepage_background"
+                currentImageUrl={(() => {
+                  const val = settings.find(s => s.key === 'homepage_background')?.value;
+                  if (!val) return '';
+                  if (typeof val === 'string') return val;
+                  return val[locale as 'en' | 'de'] || val.en || '';
+                })()}
+                title={tr(locale, 'homepageBackgroundTitle', 'admin') || 'Homepage Background'}
+                description={tr(locale, 'homepageBackgroundDescription', 'admin') || 'Background image for the homepage (recommended size: 1920x1080px)'}
+                locale={locale as 'en' | 'de'}
+                onComplete={fetchSettings}
+              />
+              
+              {/* Forum Background */}
+              <BrandingImageUploader
+                settingKey="forum_background"
+                currentImageUrl={(() => {
+                  const val = settings.find(s => s.key === 'forum_background')?.value;
+                  if (!val) return '';
+                  if (typeof val === 'string') return val;
+                  return val[locale as 'en' | 'de'] || val.en || '';
+                })()}
+                title={tr(locale, 'forumBackgroundTitle', 'admin') || 'Forum Background'}
+                description={tr(locale, 'forumBackgroundDescription', 'admin') || 'Background image for forum pages (recommended size: 1920x1080px)'}
+                locale={locale as 'en' | 'de'}
+                onComplete={fetchSettings}
+              />
             </div>
           </div>
           

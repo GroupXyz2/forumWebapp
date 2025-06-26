@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
       use: ["@svgr/webpack"]
     });
     return config;
+  },
+  // Configure server actions
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb' // Increase the limit to 10MB for branding image uploads
+    }
   }
 };
 

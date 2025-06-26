@@ -3,6 +3,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import BrandingProvider from "@/components/layout/BrandingProvider";
 
 // Import locale translations
 import enTranslations from "@/i18n/locales/en.json";
@@ -34,14 +35,19 @@ export default async function LocaleLayout({
     throw new Error(`Invalid locale: ${localeValue}`);
   }
   
+  // The homepage is the root path (/en or /de)
+  const isHomepage = true; // We'll use client-side detection in the BrandingProvider
+
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Navbar locale={localeValue as Locale} translations={translations[localeValue as keyof typeof translations]} />
-        <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {children}
-        </main>
-        <Footer locale={localeValue as Locale} />
+        <BrandingProvider locale={localeValue} isHomepage={isHomepage}>
+          <Navbar locale={localeValue as Locale} translations={translations[localeValue as keyof typeof translations]} />
+          <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {children}
+          </main>
+          <Footer locale={localeValue as Locale} />
+        </BrandingProvider>
       </AuthProvider>
     </ThemeProvider>
   );

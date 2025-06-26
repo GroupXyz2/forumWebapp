@@ -261,5 +261,24 @@
     "admin": "Admin",
     "moderator": "Moderator",
     "user": "User"
+  },
+  "branding": {
+    "contentPagesSection": "Content Pages",
+    "contentPagesDescription": "Edit the content of static pages",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "contactPage": "Contact Page",
+    "siteSettings": "Site Settings",
+    "siteSettingsDescription": "Customize the pages and content of your forum",
+    "brandingSection": "Branding & Images",
+    "brandingDescription": "Upload images for site branding and page backgrounds",
+    "logoTitle": "Site Logo",
+    "logoDescription": "Upload a logo image for your site (recommended size: 200x60px)",
+    "bannerTitle": "Header Banner",
+    "bannerDescription": "Upload a banner image for the site header (recommended size: 1200x200px)",
+    "homepageBackgroundTitle": "Homepage Background",
+    "homepageBackgroundDescription": "Background image for the homepage (recommended size: 1920x1080px)",
+    "forumBackgroundTitle": "Forum Background",
+    "forumBackgroundDescription": "Background image for forum pages (recommended size: 1920x1080px)"
   }
 }
