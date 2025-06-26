@@ -266,6 +266,16 @@ export default function SettingsClient({ locale }: SettingsClientProps) {
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>
       ) : (
         <form onSubmit={handleSaveSettings} className="space-y-6">
+          {/* Add hidden inputs for all image settings to preserve their values when form is submitted */}
+          {settings.filter(s => s.type === 'image').map(setting => (
+            <input
+              key={setting.key}
+              type="hidden"
+              name={setting.key}
+              value={getSettingStringValue(setting.value, locale)}
+            />
+          ))}
+          
           {successMessage && (
             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
               {successMessage}

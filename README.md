@@ -49,6 +49,9 @@ MONGODB_URI=your_mongodb_connection_string
 # Install dependencies
 npm install
 
+# Start the development server
+npm run dev
+
 # Run the development server
 npm run dev
 ```
@@ -94,6 +97,58 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## SSL Support
+
+This application supports SSL for secure connections. Follow these steps to enable SSL:
+
+### Environment Configuration
+
+Add the following to your `.env.local` file:
+
+```
+# SSL Configuration
+USE_SSL=true
+SSL_KEY_FILE=./certificates/localhost-key.pem
+SSL_CERT_FILE=./certificates/localhost.pem
+
+# Development Tools
+DISABLE_DEV_TOOLS=false  # Set to 'true' to disable all dev indicators
+```
+
+Note: SSL is handled by the custom server.js file and not through next.config.ts.
+
+### Generate SSL Certificates
+
+For local development, we recommend using [mkcert](https://github.com/FiloSottile/mkcert) to generate self-signed certificates:
+
+```bash
+# Install mkcert
+# Windows: choco install mkcert
+# macOS: brew install mkcert
+
+# Set up local CA
+mkcert -install
+
+# Generate certificates
+mkcert -key-file certificates/localhost-key.pem -cert-file certificates/localhost.pem localhost 127.0.0.1 ::1
+```
+
+See the README in the `certificates` directory for more detailed instructions.
+
+### Run with SSL
+
+```bash
+# Development with SSL
+npm run dev:ssl
+
+# Production with SSL
+npm run start:ssl
+```
+
+### Production SSL
+
+For production, use proper SSL certificates from a trusted certificate authority and update the `.env.local` file accordingly. With popular hosting services like Vercel, SSL is handled automatically.
 
 ## License
 

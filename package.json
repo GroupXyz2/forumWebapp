@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:ssl": "node server.js",
     "build": "next build",
     "start": "next start",
+    "start:ssl": "NODE_ENV=production node server.js",
     "lint": "next lint"
   },
   "dependencies": {

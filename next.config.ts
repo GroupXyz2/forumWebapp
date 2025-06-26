@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '10mb' // Increase the limit to 10MB for branding image uploads
     }
+  },
+  // Disable development mode indicators like the "Fast Refresh" panel
+  // Read from environment variable or default to showing in development
+  devIndicators: process.env.DISABLE_DEV_TOOLS === 'true' ? false : {
+    position: 'bottom-left'
   }
 };
 
