@@ -27,6 +27,10 @@ async function connectToDatabase() {
       bufferCommands: true,
     };
 
+    // Ensure all models are registered by importing them
+    // The import is not used directly, but it ensures the models are registered
+    await import('./models');
+    
     cached.promise = mongoose.connect(MONGODB_URI!, options)
       .then((mongoose) => {
         console.log('Connected to MongoDB');

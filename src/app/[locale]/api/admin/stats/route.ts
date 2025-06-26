@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
-import User from '@/models/User';
-import Thread from '@/models/Thread';
-import Post from '@/models/Post';
+import { User, Thread, Post } from '@/lib/models'; // Import models from central file
 
 export async function GET() {
   await connectToDatabase();

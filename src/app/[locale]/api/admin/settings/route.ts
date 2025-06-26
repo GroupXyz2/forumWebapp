@@ -64,7 +64,7 @@ export async function PUT(request: NextRequest) {
     
     await connectToDatabase();
     
-    const updates = [];
+    const operations = [];
     
     for (const setting of body.settings) {
       if (!setting.key || setting.value === undefined) {
@@ -73,22 +73,32 @@ export async function PUT(request: NextRequest) {
       
       // Find the existing setting
       const existingSetting = await SiteSetting.findOne({ key: setting.key });
-      if (!existingSetting) {
-        continue;
-      }
       
-      // Update the setting
-      updates.push(
-        SiteSetting.updateOne(
-          { key: setting.key },
-          { $set: { value: setting.value, updatedAt: new Date() } }
-        )
-      );
+      if (existingSetting) {
+        // Update existing setting
+        operations.push(
+          SiteSetting.updateOne(
+            { key: setting.key },
+            { $set: { value: setting.value, updatedAt: new Date() } }
+          )
+        );
+      } else {
+        // Create new setting if it doesn't exist
+        operations.push(
+          SiteSetting.create({
+            key: setting.key,
+            value: setting.value,
+            type: setting.type || 'text',
+            scope: setting.scope || 'content',
+            updatedAt: new Date()
+          })
+        );
+      }
     }
     
-    // Execute all updates
-    if (updates.length > 0) {
-      await Promise.all(updates);
+    // Execute all operations
+    if (operations.length > 0) {
+      await Promise.all(operations);
     }
     
     return NextResponse.json({ success: true });

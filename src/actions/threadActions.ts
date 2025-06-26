@@ -250,7 +250,7 @@ export async function createReply(
         id: populatedPost._id.toString(),
         content: populatedPost.content,
         author: populatedPost.author,
-        likes: [],
+        likes: populatedPost.likes || [],
         createdAt: populatedPost.createdAt,
         updatedAt: populatedPost.updatedAt,
         isEdited: false

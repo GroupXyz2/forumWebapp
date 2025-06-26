@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import * as React from "react";
+import { getLocalizedString } from "@/lib/multilang";
 
 // Import locale translations
 import enTranslations from "@/i18n/locales/en.json";
@@ -15,11 +17,8 @@ const translations = {
   de: deTranslations,
 };
 
-type AdminPageProps = {
-  params: { locale: Locale };
-};
-
-export default function AdminPage({ params: { locale } }: AdminPageProps) {
+export default function AdminPage({ params }: { params: Promise<{ locale: Locale }> }) {
+  const { locale } = React.use(params);
   const { data: session, status } = useSession();
   const router = useRouter();
   const t = translations[locale];
@@ -54,8 +53,22 @@ export default function AdminPage({ params: { locale } }: AdminPageProps) {
   
   useEffect(() => {
     fetch(`/${locale}/api/admin/recent-activity`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Error fetching recent activity: ${res.status} ${res.statusText}`);
+        }
+        return res.json();
+      })
       .then(data => setRecentActivity(data))
+      .catch(err => {
+        console.error("Error fetching recent activity:", err);
+        // Set empty data on error
+        setRecentActivity({
+          recentUsers: [],
+          recentThreads: [],
+          recentAuditLogs: []
+        });
+      })
       .finally(() => setActivityLoading(false));
   }, [locale]);
 
@@ -250,14 +263,16 @@ export default function AdminPage({ params: { locale } }: AdminPageProps) {
                       <span className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-green-500"></span>
                       <div className="ml-3">
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          <Link href={`/${locale}/forum/${thread.category?.slug}/${thread.slug}`}>
-                            {thread.title}
-                          </Link> - <span className="text-gray-600 dark:text-gray-400">{thread.category?.name}</span>
+                          <Link href={`/${locale}/forum/${thread.category?.slug || ''}/${thread.slug}`}>
+                            {getLocalizedString(thread.title, locale)}
+                          </Link> - <span className="text-gray-600 dark:text-gray-400">
+                            {getLocalizedString(thread.category?.name, locale)}
+                          </span>
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                           {locale === 'en' 
-                            ? `By ${thread.author?.name} on ${new Date(thread.createdAt).toLocaleDateString()}` 
-                            : `Von ${thread.author?.name} am ${new Date(thread.createdAt).toLocaleDateString()}`}
+                            ? `By ${thread.author?.name || 'Unknown'} on ${new Date(thread.createdAt).toLocaleDateString()}` 
+                            : `Von ${thread.author?.name || 'Unbekannt'} am ${new Date(thread.createdAt).toLocaleDateString()}`}
                         </p>
                       </div>
                     </div>
