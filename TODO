@@ -1,0 +1,7 @@
+1. the quick stats and recent activity need to show real data not dummy data, this still needs to be done, also there is currently no way to view the audit log, its missing locales and /admin/categories needs to be implemented!
+
+2. the terms, privacy and contact pages are missing, implement these and make them easy to edit.
+
+3. the dark mode is still not working when clicking on the button, and also allow me to easily change the features boxes content and etc on the main page.
+
+4. implement the like system for posts, and fix the initial post in a thread beeing shown twice

@@ -46,6 +46,8 @@
     "users": "Benutzer",
     "categories": "Kategorien",
     "threads": "Themen",
+    "auditLog": "Audit-Protokoll",
+    "auditLogDesc": "Sehe alle Moderations- und Verwaltungsaktionen an",
     "reports": "Meldungen",
     "settings": "Einstellungen",
     "create_category": "Kategorie erstellen",
